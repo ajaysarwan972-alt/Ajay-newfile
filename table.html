@@ -64,10 +64,17 @@ async function loadData(){
     .from("login")
     .select("*")
 
-    console.log(data, error)
+    console.log("DATA:", data)
+    console.log("ERROR:", error)
 
     if(error){
-        alert("Error aa raha hai")
+        alert("Supabase error: " + error.message)
+        return
+    }
+
+    if(!data || data.length === 0){
+        document.getElementById("data").innerHTML = 
+        "<tr><td colspan='5'>No data found</td></tr>"
         return
     }
 
@@ -77,10 +84,10 @@ async function loadData(){
         html += `
         <tr>
             <td>${row.id}</td>
-            <td>${row.name}</td>
-            <td>${row.mobile}</td>
-            <td>${row.password}</td>
-            <td>${row.balance}</td>
+            <td>${row.name || ""}</td>
+            <td>${row.mobile || ""}</td>
+            <td>${row.password || ""}</td>
+            <td>${row.balance || ""}</td>
         </tr>`
     })
 
