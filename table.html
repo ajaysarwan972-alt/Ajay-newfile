@@ -41,16 +41,12 @@ input {
     text-align: center;
     background: transparent;
 }
-
-h2 {
-    margin: 5px 0;
-}
 </style>
 </head>
 
 <body>
 
-<h2>Login Table</h2>
+<h2>login</h2>
 <div class="frame">
 <table>
 <thead>
@@ -66,7 +62,7 @@ h2 {
 </table>
 </div>
 
-<h2>Game result</h2>
+<h2>game_result</h2>
 <div class="frame">
 <table>
 <thead>
@@ -82,7 +78,7 @@ h2 {
 </table>
 </div>
 
-<h2>History</h2>
+<h2>history</h2>
 <div class="frame">
 <table>
 <thead>
@@ -105,13 +101,14 @@ const supabase = window.supabase.createClient(
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 )
 
-// LOGIN TABLE
+// LOGIN
 async function loadUsers(){
     const { data, error } = await supabase.from("login").select("*")
 
-    console.log("LOGIN:", data, error)
-
-    if(!data) return
+    if(error){
+        console.log("LOGIN ERROR:", error)
+        return
+    }
 
     let html = ""
     data.forEach(row => {
@@ -133,13 +130,14 @@ async function updateUser(input, column, id){
 }
 
 
-// GAME RESULT (IMPORTANT FIX)
+// GAME RESULT (FIXED NAME)
 async function loadGames(){
-    const { data, error } = await supabase.from("Game result").select("*")
+    const { data, error } = await supabase.from("game_result").select("*")
 
-    console.log("GAME:", data, error)
-
-    if(!data) return
+    if(error){
+        console.log("GAME ERROR:", error)
+        return
+    }
 
     let html = ""
     data.forEach(row => {
@@ -157,7 +155,7 @@ async function loadGames(){
 }
 
 async function updateGame(input, column, id){
-    await supabase.from("Game result").update({ [column]: input.value }).eq("id", id)
+    await supabase.from("game_result").update({ [column]: input.value }).eq("id", id)
 }
 
 
@@ -165,9 +163,10 @@ async function updateGame(input, column, id){
 async function loadHistory(){
     const { data, error } = await supabase.from("history").select("*")
 
-    console.log("HISTORY:", data, error)
-
-    if(!data) return
+    if(error){
+        console.log("HISTORY ERROR:", error)
+        return
+    }
 
     let html = ""
     data.forEach(row => {
