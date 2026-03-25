@@ -50,49 +50,49 @@ h2 {
 
 <body>
 
-<h2>User Table</h2>
+<h2>Login Table</h2>
 <div class="frame">
     <table>
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Mobile</th>
-                <th>Password</th>
-                <th>Balance</th>
+                <th>id</th>
+                <th>name</th>
+                <th>mobile</th>
+                <th>password</th>
+                <th>balance</th>
             </tr>
         </thead>
         <tbody id="userData"></tbody>
     </table>
 </div>
 
-<h2>Game Result</h2>
+<h2>game_result</h2>
 <div class="frame">
     <table>
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Number</th>
-                <th>Open</th>
-                <th>Close</th>
+                <th>id</th>
+                <th>name</th>
+                <th>number</th>
+                <th>open</th>
+                <th>close</th>
             </tr>
         </thead>
         <tbody id="gameData"></tbody>
     </table>
 </div>
 
-<h2>History</h2>
+<h2>history</h2>
 <div class="frame">
     <table>
         <thead>
             <tr>
-                <th>ID</th>
-                <th>User ID</th>
-                <th>Game</th>
-                <th>Number</th>
-                <th>Amount</th>
-                <th>Status</th>
+                <th>id</th>
+                <th>user_id</th>
+                <th>game</th>
+                <th>number</th>
+                <th>amount</th>
+                <th>status</th>
             </tr>
         </thead>
         <tbody id="historyData"></tbody>
@@ -105,10 +105,9 @@ const supabase = window.supabase.createClient(
     "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 )
 
-
-// USER TABLE
+// LOGIN TABLE
 async function loadUsers(){
-    const { data } = await supabase.from("user").select("*")
+    const { data } = await supabase.from("login").select("*")
 
     let html = ""
     data.forEach(row => {
@@ -126,13 +125,13 @@ async function loadUsers(){
 }
 
 async function updateUser(input, column, id){
-    await supabase.from("user").update({ [column]: input.value }).eq("id", id)
+    await supabase.from("login").update({ [column]: input.value }).eq("id", id)
 }
 
 
 // GAME RESULT
 async function loadGames(){
-    const { data } = await supabase.from("game result").select("*")
+    const { data } = await supabase.from("game_result").select("*")
 
     let html = ""
     data.forEach(row => {
@@ -150,7 +149,7 @@ async function loadGames(){
 }
 
 async function updateGame(input, column, id){
-    await supabase.from("game result").update({ [column]: input.value }).eq("id", id)
+    await supabase.from("game_result").update({ [column]: input.value }).eq("id", id)
 }
 
 
@@ -175,7 +174,7 @@ async function loadHistory(){
 }
 
 
-// LOAD ALL
+// LOAD
 loadUsers()
 loadGames()
 loadHistory()
