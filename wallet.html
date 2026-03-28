@@ -2,24 +2,18 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wallet</title>
+<title>Wallet System</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 body{font-family:Arial;background:#f2f2f2;margin:0;padding:10px;}
 
-.topbar{
-display:flex;
-justify-content:space-between;
-margin-bottom:15px;
-}
-
+.topbar{display:flex;justify-content:space-between;margin-bottom:15px;}
 .idbox{background:green;color:#fff;padding:8px 15px;border-radius:20px;}
 .walletbox{background:red;color:#fff;padding:8px 15px;border-radius:20px;}
 
 .card{background:#fff;padding:20px;border-radius:15px;margin-bottom:20px;text-align:center;}
-
 .balance{font-size:28px;font-weight:bold;}
 
 .btns{display:flex;gap:10px;margin-top:15px;}
@@ -33,38 +27,10 @@ input{width:100%;padding:12px;margin-top:10px;border-radius:10px;border:1px soli
 .green{background:#7cc84a;}
 .red{background:#ff4d4d;}
 
-/* 🔥 HISTORY BOX FIX */
-.table-box{
-background:#fff;
-border-radius:15px;
-padding:10px;
-margin-bottom:20px;
-max-height:260px;
-overflow-y:auto;
-}
+.table-box{background:#fff;border-radius:15px;padding:10px;margin-bottom:20px;}
 
-/* 🔥 TABLE STYLE */
-table{
-width:100%;
-border-collapse:collapse;
-}
-
-thead{
-position:sticky;
-top:0;
-background:red;
-color:#fff;
-}
-
-th{
-padding:10px;
-}
-
-td{
-padding:8px;
-text-align:center;
-border-bottom:1px solid #ccc;
-}
+th{background:red;color:#fff;padding:10px;}
+td{padding:8px;text-align:center;border-bottom:1px solid #ccc;}
 
 .hide{display:none;}
 </style>
@@ -77,8 +43,10 @@ border-bottom:1px solid #ccc;
 <div class="walletbox" id="wallet">₹ 0</div>
 </div>
 
-<!-- WALLET -->
-<div class="card" id="home">
+<!-- ================= WALLET ================= -->
+<div id="home">
+
+<div class="card">
 <div class="balance" id="mainBalance">₹ 0</div>
 <div>Available Balance</div>
 
@@ -88,40 +56,52 @@ border-bottom:1px solid #ccc;
 </div>
 </div>
 
-<!-- DEPOSIT -->
-<div class="card hide" id="depositBox">
-<h3>Deposit</h3>
+<div class="table-box">
+<h3>Deposit History</h3>
+<table width="100%">
+<tr><th>ID</th><th>Amount</th><th>Status</th></tr>
+<tbody id="depositHistory"></tbody>
+</table>
+</div>
+
+<div class="table-box">
+<h3>Withdraw History</h3>
+<table width="100%">
+<tr><th>ID</th><th>Amount</th><th>Status</th></tr>
+<tbody id="withdrawHistory"></tbody>
+</table>
+</div>
+
+</div>
+
+<!-- ================= DEPOSIT ================= -->
+<div id="depositPage" class="hide">
+
+<div class="card">
 <input type="number" id="depAmount" placeholder="Enter Amount">
-<button class="main-btn green" onclick="submitDeposit()">SUBMIT</button>
+<button class="main-btn green" onclick="goStep2()">SUBMIT</button>
 <button class="main-btn red" onclick="goHome()">BACK</button>
 </div>
 
-<!-- WITHDRAW -->
-<div class="card hide" id="withdrawBox">
-<h3>Withdraw</h3>
+<div class="card hide" id="step2">
+<div>Screenshot upload karo</div>
+
+<input type="file" id="file">
+
+<button class="main-btn green" onclick="submitDeposit()">CONFIRM</button>
+</div>
+
+</div>
+
+<!-- ================= WITHDRAW ================= -->
+<div id="withdrawPage" class="hide">
+
+<div class="card">
 <input type="number" id="withAmount" placeholder="Enter Amount">
 <button class="main-btn green" onclick="submitWithdraw()">SUBMIT</button>
 <button class="main-btn red" onclick="goHome()">BACK</button>
 </div>
 
-<!-- DEPOSIT HISTORY -->
-<div class="table-box">
-<table>
-<thead>
-<tr><th>ID</th><th>Amount</th><th>Status</th></tr>
-</thead>
-<tbody id="depositHistory"></tbody>
-</table>
-</div>
-
-<!-- WITHDRAW HISTORY -->
-<div class="table-box">
-<table>
-<thead>
-<tr><th>ID</th><th>Amount</th><th>Status</th></tr>
-</thead>
-<tbody id="withdrawHistory"></tbody>
-</table>
 </div>
 
 <script>
@@ -182,24 +162,29 @@ withdrawHistory.innerHTML = html;
 
 // PAGE SWITCH
 function openDeposit(){
-depositBox.classList.remove("hide");
-withdrawBox.classList.add("hide");
+home.classList.add("hide");
+depositPage.classList.remove("hide");
 }
 
 function openWithdraw(){
-withdrawBox.classList.remove("hide");
-depositBox.classList.add("hide");
+home.classList.add("hide");
+withdrawPage.classList.remove("hide");
 }
 
 function goHome(){
-depositBox.classList.add("hide");
-withdrawBox.classList.add("hide");
+home.classList.remove("hide");
+depositPage.classList.add("hide");
+withdrawPage.classList.add("hide");
+}
+
+// STEP
+function goStep2(){
+step2.classList.remove("hide");
 }
 
 // DEPOSIT
 async function submitDeposit(){
 let amount = Number(depAmount.value);
-if(!amount) return alert("Amount daal");
 
 await client.from("deposit_requests").insert([{
 user_id:user.id,
@@ -207,7 +192,7 @@ amount:amount,
 status:"pending"
 }]);
 
-alert("Deposit Request Sent ✅");
+alert("Deposit Request Sent");
 location.reload();
 }
 
@@ -219,7 +204,7 @@ let amount = Number(withAmount.value);
 let { data } = await client.from("login").select("balance").eq("id",user.id).single();
 
 if(data.balance < amount){
-alert("Balance kam hai ❌");
+alert("Balance kam hai");
 return;
 }
 
@@ -233,11 +218,11 @@ amount:amount,
 status:"pending"
 }]);
 
-alert("Withdraw Request Sent ✅");
+alert("Withdraw Request Sent");
 location.reload();
 }
 
-// LOAD ALL
+// LOAD
 loadUser();
 loadDeposit();
 loadWithdraw();
