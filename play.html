@@ -99,7 +99,7 @@ font-size:13px;
 <!-- IMAGE -->
 <div id="imageBox" class="hide">
 
-<img src="https://i.imgur.com/yourImage.jpg" width="100%" style="border-radius:10px">
+<img src="https://i.imgur.com/8Km9tLL.jpg" width="100%" style="border-radius:10px">
 
 <input type="file" id="imageInput">
 
@@ -140,11 +140,10 @@ loadWallet();
 function showBox(id){
 document.getElementById("typingBox").classList.add("hide");
 document.getElementById("imageBox").classList.add("hide");
-
 document.getElementById(id).classList.remove("hide");
 }
 
-// TYPING SUBMIT
+// TYPING
 async function submitTyping(){
 
 let text=document.getElementById("typingData").value;
@@ -162,12 +161,10 @@ alert("Low balance");
 return;
 }
 
-// wallet cut
 await client.from("login").update({
 balance:data.balance-amount
 }).eq("id",user.id);
 
-// insert
 await client.from("history").insert([{
 user_id:user.id,
 market:market,
@@ -179,7 +176,7 @@ alert("Done");
 location.reload();
 }
 
-// IMAGE SUBMIT
+// IMAGE
 async function submitImage(){
 
 let file=document.getElementById("imageInput").files[0];
@@ -190,17 +187,26 @@ alert("Fill all fields");
 return;
 }
 
-// upload image
+// ✅ FIXED UPLOAD
 let fileName=Date.now()+"_"+file.name;
 
-let {data,error}=await client.storage.from("images").upload(fileName,file);
+let { error } = await client.storage
+.from("images")
+.upload(fileName, file, {
+contentType: file.type
+});
 
 if(error){
-alert("Upload error");
+alert(error.message); // 👈 ab exact error dikhega
 return;
 }
 
-let url="https://katbdbzoufiblnnsoxkk.supabase.co/storage/v1/object/public/images/"+fileName;
+// public url
+let { data } = client.storage
+.from("images")
+.getPublicUrl(fileName);
+
+let imageUrl = data.publicUrl;
 
 // wallet
 let {data:userData}=await client.from("login").select("balance").eq("id",user.id).single();
@@ -219,7 +225,7 @@ await client.from("history").insert([{
 user_id:user.id,
 market:market,
 typing:null,
-image:url
+image:imageUrl
 }]);
 
 alert("Done");
