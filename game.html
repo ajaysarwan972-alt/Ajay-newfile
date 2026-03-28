@@ -7,78 +7,37 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-body{font-family:Arial;margin:0;background:#f2f2f2;}
+body{font-family:Arial;margin:0;background:#e5e7eb;}
 
 .header{
 position:fixed;top:10px;left:10px;right:10px;
+background:#fff;padding:10px;border-radius:20px;
 display:flex;justify-content:space-between;
-padding:10px;
+z-index:999;
 }
 
-#userId{background:#4CAF50;color:#fff;padding:8px 20px;border-radius:20px;}
-#wallet{background:#ff0000;color:#fff;padding:8px 20px;border-radius:20px;}
+#userId{background:green;color:#fff;padding:6px 12px;border-radius:20px;font-size:12px;}
+#wallet{background:red;color:#fff;padding:6px 12px;border-radius:20px;font-size:12px;}
 
-.topBtns{
-margin-top:80px;
-text-align:center;
-}
+.topBtns{margin-top:80px;display:flex;justify-content:space-around;}
+.topBtn{width:22%;padding:10px;border-radius:20px;color:#fff;text-align:center;cursor:pointer;font-size:12px;}
+.btn1{background:#6c5ce7;}
+.btn2{background:#00b894;}
+.btn3{background:#0984e3;}
+.btn4{background:#e17055;}
 
-.topBtns button{
-padding:12px 20px;
-margin:5px;
-border:none;
-border-radius:20px;
-background:#e74c3c;
-color:#fff;
-font-weight:bold;
-}
-
-.activeBtn{background:#8BC34A !important;}
-
-.game{display:none;padding:10px;}
+.game{display:none;}
 .active{display:block;}
 
-.grid{
-display:grid;
-grid-template-columns:repeat(4,1fr);
-gap:10px;
-}
+.container{margin:10px;background:#fff;padding:15px;border-radius:15px;padding-bottom:120px;}
 
-.box{
-background:#fff;
-padding:15px;
-border-radius:10px;
-text-align:center;
-}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.box{background:#fff;padding:10px;border-radius:10px;text-align:center;border:1px solid #ddd;}
+input{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;}
 
-.box input{
-width:90%;
-padding:5px;
-margin-top:5px;
-}
-
-.bottom{
-position:fixed;
-bottom:0;
-width:100%;
-display:flex;
-}
-
-.total{
-width:50%;
-background:linear-gradient(to right,blue,red);
-color:#fff;
-text-align:center;
-padding:15px;
-}
-
-.submit{
-width:50%;
-background:#8BC34A;
-color:#fff;
-text-align:center;
-padding:15px;
-}
+.bottom{position:fixed;bottom:0;width:100%;display:flex;}
+.total{width:50%;background:linear-gradient(to right,blue,red);color:#fff;text-align:center;padding:15px;}
+.submit{width:50%;background:green;color:#fff;text-align:center;padding:15px;}
 </style>
 </head>
 
@@ -90,19 +49,19 @@ padding:15px;
 </div>
 
 <div class="topBtns">
-<button id="btn1" onclick="showGame('jodi',this)">JODI</button>
-<button id="btn2" onclick="showGame('haruf',this)">HARUF</button>
-<button id="btn3" onclick="showGame('crossing',this)">CROSSING</button>
-<button id="btn4" onclick="showGame('copy',this)">COPY PASTE</button>
+<div class="topBtn btn1" onclick="showGame('jodi')">JODI</div>
+<div class="topBtn btn2" onclick="showGame('haruf')">HARUF</div>
+<div class="topBtn btn3" onclick="showGame('crossing')">CROSSING</div>
+<div class="topBtn btn4" onclick="showGame('copy')">COPY</div>
 </div>
 
 <!-- JODI -->
-<div id="jodi" class="game active">
+<div id="jodi" class="game active container">
 <div class="grid" id="jodiGrid"></div>
 </div>
 
 <!-- HARUF -->
-<div id="haruf" class="game">
+<div id="haruf" class="game container">
 <h3>Single Andar</h3>
 <div class="grid" id="harufGrid1"></div>
 
@@ -110,21 +69,44 @@ padding:15px;
 <div class="grid" id="harufGrid2"></div>
 </div>
 
-<!-- CROSSING -->
-<div id="crossing" class="game">
-<input id="c_num1" placeholder="1st number">
-<input id="c_num2" placeholder="2nd number">
-<input id="c_amt" placeholder="Points">
-<button onclick="generateCross()">SUBMIT</button>
+<!-- CROSSING (FILE SAME) -->
+<div id="crossing" class="game container">
+
+<label>1ST NUMBER</label>
+<input id="num1">
+
+<label>2ND NUMBER</label>
+<input id="num2">
+
+<label>POINTS</label>
+<input id="points">
+
+<button onclick="generateCross()">SET</button>
+
+<div id="crossGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;"></div>
+
 </div>
 
-<!-- COPY -->
-<div id="copy" class="game">
-<input id="digits" placeholder="Enter Digit">
-<input id="amt" placeholder="Amount">
+<!-- COPY (FILE SAME) -->
+<div id="copy" class="game container">
+
+<label>ENTER DIGIT</label>
+<input id="digits">
+
+<label>ENTER AMOUNT</label>
+<input id="amt">
+
 <br><br>
-<label><input type="radio" name="type" value="with" checked> With Palti</label>
-<label><input type="radio" name="type" value="without"> Without Palti</label>
+
+<label><input type="radio" name="p" value="with" checked> With Palti</label>
+<label><input type="radio" name="p" value="without"> Without Palti</label>
+
+<button onclick="generateCopy()">ADD</button>
+
+<table id="table" border="1" width="100%">
+<tr><th>NUMBER</th><th>AMOUNT</th><th>DEL</th></tr>
+</table>
+
 </div>
 
 <div class="bottom">
@@ -142,21 +124,16 @@ const client = supabase.createClient(
 const user = JSON.parse(localStorage.getItem("user"));
 const market = localStorage.getItem("market") || "UNKNOWN";
 
-let total = 0;
-let dataArr = [];
+let total=0;
+let dataArr=[];
 
-// SWITCH GAME
-function showGame(id,btn){
+function showGame(id){
 document.querySelectorAll(".game").forEach(g=>g.classList.remove("active"));
 document.getElementById(id).classList.add("active");
-
-document.querySelectorAll(".topBtns button").forEach(b=>b.classList.remove("activeBtn"));
-btn.classList.add("activeBtn");
 }
 
-// WALLET
 async function loadWallet(){
-let {data} = await client.from("login").select("balance").eq("id",user.id).single();
+let {data}=await client.from("login").select("balance").eq("id",user.id).single();
 wallet.innerText="₹ "+data.balance;
 userId.innerText="ID: "+user.id;
 }
@@ -165,54 +142,71 @@ loadWallet();
 // JODI
 for(let i=0;i<100;i++){
 let num=i.toString().padStart(2,'0');
-let div=document.createElement("div");
-div.className="box";
-div.innerHTML=`${num}<br><input oninput="addData('${num}',this.value)">`;
-jodiGrid.appendChild(div);
+jodiGrid.innerHTML+=`<div class="box">${num}<input oninput="add('${num}',this.value)"></div>`;
 }
 
 // HARUF
 for(let i=0;i<10;i++){
-let div=document.createElement("div");
-div.className="box";
-div.innerHTML=`${i}<br><input oninput="addData('${i}',this.value)">`;
-harufGrid1.appendChild(div);
-harufGrid2.appendChild(div.cloneNode(true));
+harufGrid1.innerHTML+=`<div class="box">${i}<input oninput="add('${i}',this.value)"></div>`;
+harufGrid2.innerHTML+=`<div class="box">${i}<input oninput="add('${i}',this.value)"></div>`;
 }
 
-// ADD DATA
-function addData(num,val){
-val = Number(val)||0;
+function add(num,val){
+val=Number(val)||0;
 if(val>0){
 dataArr.push({number:num,amount:val});
 total+=val;
 }
-document.getElementById("total").innerText="₹ "+total;
+totalBox();
 }
 
-// CROSSING
+// CROSSING FULL
 function generateCross(){
-let n1=c_num1.value,n2=c_num2.value,a=Number(c_amt.value);
+let n1=num1.value,n2=num2.value,a=Number(points.value);
+crossGrid.innerHTML="";
 for(let i of n1){
 for(let j of n2){
-dataArr.push({number:i+j,amount:a});
+let pair=i+j;
+dataArr.push({number:pair,amount:a});
 total+=a;
+
+crossGrid.innerHTML+=`<div class="box">${pair}<br>₹${a}</div>`;
 }
 }
-document.getElementById("total").innerText="₹ "+total;
+totalBox();
 }
 
-// COPY
+// COPY FULL
 function generateCopy(){
 let d=digits.value,a=Number(amt.value);
+let type=document.querySelector('input[name="p"]:checked').value;
+
 let arr=d.match(/.{1,2}/g);
 arr.forEach(num=>{
-dataArr.push({number:num,amount:a});
-total+=a;
+if(num.length==1) num="0"+num;
+
+addRow(num,a);
+
+if(type=="with"){
+let rev=num.split("").reverse().join("");
+if(rev!=num) addRow(rev,a);
+}
 });
 }
 
-// SUBMIT
+function addRow(num,a){
+dataArr.push({number:num,amount:a});
+total+=a;
+
+table.innerHTML+=`<tr><td>${num}</td><td>${a}</td><td><button onclick="this.parentElement.parentElement.remove()">X</button></td></tr>`;
+totalBox();
+}
+
+function totalBox(){
+document.getElementById("total").innerText="₹ "+total;
+}
+
+// FINAL SUBMIT (SAME SYSTEM)
 async function submitAll(){
 if(total<=0){alert("No data");return;}
 
