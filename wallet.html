@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wallet System</title>
+<title>Wallet</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -18,18 +18,25 @@ margin-bottom:15px;
 .idbox{background:green;color:#fff;padding:8px 15px;border-radius:20px;}
 .walletbox{background:red;color:#fff;padding:8px 15px;border-radius:20px;}
 
-.card{background:#fff;padding:20px;border-radius:15px;margin-bottom:15px;text-align:center;}
+.card{background:#fff;padding:20px;border-radius:15px;margin-bottom:20px;text-align:center;}
+
+.balance{font-size:28px;font-weight:bold;}
 
 .btns{display:flex;gap:10px;margin-top:15px;}
-.btn{flex:1;padding:12px;border:none;border-radius:10px;color:#fff;}
+.btn{flex:1;padding:12px;border:none;border-radius:10px;color:#fff;font-weight:bold;}
 .deposit{background:green;}
 .withdraw{background:red;}
 
-input{width:100%;padding:10px;margin-top:10px;border-radius:10px;border:1px solid #ccc;}
+input{width:100%;padding:12px;margin-top:10px;border-radius:10px;border:1px solid #ccc;}
 
-.main-btn{width:100%;padding:12px;border:none;border-radius:10px;margin-top:10px;color:#fff;}
+.main-btn{width:100%;padding:12px;border:none;border-radius:10px;margin-top:10px;color:#fff;font-weight:bold;}
 .green{background:#7cc84a;}
 .red{background:#ff4d4d;}
+
+.table-box{background:#fff;border-radius:15px;padding:10px;margin-bottom:20px;}
+
+th{background:red;color:#fff;padding:10px;}
+td{padding:8px;text-align:center;border-bottom:1px solid #ccc;}
 
 .hide{display:none;}
 </style>
@@ -42,35 +49,49 @@ input{width:100%;padding:10px;margin-top:10px;border-radius:10px;border:1px soli
 <div class="walletbox" id="wallet">₹ 0</div>
 </div>
 
-<!-- MAIN WALLET -->
+<!-- WALLET -->
 <div class="card" id="home">
-<h2 id="mainBalance">₹ 0</h2>
-<p>Available Balance</p>
+<div class="balance" id="mainBalance">₹ 0</div>
+<div>Available Balance</div>
 
 <div class="btns">
-<button class="btn deposit" onclick="openDeposit()">DEPOSIT</button>
-<button class="btn withdraw" onclick="openWithdraw()">WITHDRAW</button>
+<button class="btn deposit" onclick="openDeposit()">ADD +</button>
+<button class="btn withdraw" onclick="openWithdraw()">WID -</button>
 </div>
 </div>
 
 <!-- DEPOSIT -->
 <div class="card hide" id="depositBox">
 <h3>Deposit</h3>
-
 <input type="number" id="depAmount" placeholder="Enter Amount">
-<button class="main-btn green" onclick="submitDeposit()">Submit</button>
-
-<button class="main-btn red" onclick="goHome()">Back</button>
+<button class="main-btn green" onclick="submitDeposit()">SUBMIT</button>
+<button class="main-btn red" onclick="goHome()">BACK</button>
 </div>
 
 <!-- WITHDRAW -->
 <div class="card hide" id="withdrawBox">
 <h3>Withdraw</h3>
-
 <input type="number" id="withAmount" placeholder="Enter Amount">
-<button class="main-btn green" onclick="submitWithdraw()">Submit</button>
+<button class="main-btn green" onclick="submitWithdraw()">SUBMIT</button>
+<button class="main-btn red" onclick="goHome()">BACK</button>
+</div>
 
-<button class="main-btn red" onclick="goHome()">Back</button>
+<!-- DEPOSIT HISTORY -->
+<div class="table-box">
+<h3>Deposit History</h3>
+<table width="100%">
+<tr><th>ID</th><th>Amount</th><th>Status</th></tr>
+<tbody id="depositHistory"></tbody>
+</table>
+</div>
+
+<!-- WITHDRAW HISTORY -->
+<div class="table-box">
+<h3>Withdraw History</h3>
+<table width="100%">
+<tr><th>ID</th><th>Amount</th><th>Status</th></tr>
+<tbody id="withdrawHistory"></tbody>
+</table>
 </div>
 
 <script>
@@ -90,30 +111,64 @@ userId.innerText="ID: "+data.id;
 wallet.innerText="₹ "+data.balance;
 mainBalance.innerText="₹ "+data.balance;
 }
-loadUser();
+
+// LOAD DEPOSIT HISTORY
+async function loadDeposit(){
+let { data } = await client.from("deposit_requests")
+.select("*")
+.eq("user_id", user.id)
+.order("id",{ascending:false});
+
+let html="";
+data.forEach(r=>{
+html+=`<tr>
+<td>${r.id}</td>
+<td>${r.amount}</td>
+<td>${r.status}</td>
+</tr>`;
+});
+
+depositHistory.innerHTML = html;
+}
+
+// LOAD WITHDRAW HISTORY
+async function loadWithdraw(){
+let { data } = await client.from("withdraw_requests")
+.select("*")
+.eq("user_id", user.id)
+.order("id",{ascending:false});
+
+let html="";
+data.forEach(r=>{
+html+=`<tr>
+<td>${r.id}</td>
+<td>${r.amount}</td>
+<td>${r.status}</td>
+</tr>`;
+});
+
+withdrawHistory.innerHTML = html;
+}
 
 // PAGE SWITCH
 function openDeposit(){
-home.classList.add("hide");
 depositBox.classList.remove("hide");
+withdrawBox.classList.add("hide");
 }
 
 function openWithdraw(){
-home.classList.add("hide");
 withdrawBox.classList.remove("hide");
+depositBox.classList.add("hide");
 }
 
 function goHome(){
 depositBox.classList.add("hide");
 withdrawBox.classList.add("hide");
-home.classList.remove("hide");
 }
 
 // DEPOSIT
 async function submitDeposit(){
-
 let amount = Number(depAmount.value);
-
 if(!amount) return alert("Amount daal");
 
 await client.from("deposit_requests").insert([{
@@ -151,6 +206,11 @@ status:"pending"
 alert("Withdraw Request Sent ✅");
 location.reload();
 }
+
+// LOAD ALL
+loadUser();
+loadDeposit();
+loadWithdraw();
 
 </script>
 
