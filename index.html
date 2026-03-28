@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login / Signup</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{
+margin:0;
+font-family:Arial;
+background:#f2f2f2;
+text-align:center;
+}
+
+.top{
+background:red;
+height:40px;
+}
+
+h1{
+color:red;
+margin-top:30px;
+}
+
+.input{
+width:85%;
+margin:12px auto;
+padding:15px;
+border-radius:20px;
+border:none;
+box-shadow:0 3px 10px rgba(0,0,0,0.2);
+font-size:16px;
+}
+
+.btn{
+width:85%;
+padding:15px;
+border:none;
+border-radius:30px;
+background:red;
+color:#fff;
+font-size:18px;
+font-weight:bold;
+margin-top:15px;
+}
+
+.blueBtn{
+background:#3498db;
+}
+
+.link{
+color:red;
+font-weight:bold;
+cursor:pointer;
+}
+
+.page{
+display:none;
+}
+
+.active{
+display:block;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="top"></div>
+
+<!-- LOGIN -->
+<div id="loginPage" class="page active">
+
+<h1>Login</h1>
+
+<input id="loginMobile" class="input" placeholder="Mobile Number">
+<input id="loginPassword" type="password" class="input" placeholder="Password">
+
+<p class="link">Forgot Password?</p>
+
+<button class="btn" onclick="login()">LOGIN</button>
+
+<p>New User?</p>
+<button class="btn blueBtn" onclick="showPage('signupPage')">REGISTER NOW</button>
+
+</div>
+
+<!-- SIGNUP -->
+<div id="signupPage" class="page">
+
+<h1>Create Account</h1>
+
+<p class="link" onclick="location.reload()">🔄 Refresh URL</p>
+
+<input id="name" class="input" placeholder="Full Name">
+<input id="mobile" class="input" placeholder="Mobile Number">
+<input id="password" type="password" class="input" placeholder="Password">
+<input id="ref" class="input" placeholder="Referral Code (Optional)">
+
+<button class="btn" onclick="signup()">REGISTER</button>
+
+<p>Already a Member? <span class="link" onclick="showPage('loginPage')">Login</span></p>
+
+</div>
+
+<script>
+
+const client = supabase.createClient(
+"https://katbdbzoufiblnnsoxkk.supabase.co",
+"sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
+);
+
+// AUTO LOGIN
+if(localStorage.getItem("user")){
+ location.href="home.html";
+}
+
+// SWITCH PAGE
+function showPage(id){
+document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+}
+
+// LOGIN
+async function login(){
+
+let mobile = document.getElementById("loginMobile").value.trim();
+let password = document.getElementById("loginPassword").value.trim();
+
+if(!mobile || !password){
+alert("Fill all fields");
+return;
+}
+
+let {data,error} = await client
+.from("login")
+.select("id,mobile")
+.eq("mobile",mobile)
+.eq("password",password)
+.single();
+
+if(error || !data){
+alert("Wrong Mobile or Password ❌");
+return;
+}
+
+localStorage.clear();
+
+localStorage.setItem("user",JSON.stringify({
+id:data.id,
+mobile:data.mobile
+}));
+
+localStorage.setItem("user_id",data.id);
+
+alert("Login Success ✅");
+location.href="home.html";
+}
+
+// SIGNUP
+async function signup(){
+
+let name = document.getElementById("name").value.trim();
+let mobile = document.getElementById("mobile").value.trim();
+let password = document.getElementById("password").value.trim();
+
+if(!name || !mobile || !password){
+alert("Sab fill kar");
+return;
+}
+
+let {error} = await client
+.from("login")
+.insert([{
+name:name,
+mobile:mobile,
+password:password,
+balance:0
+}]);
+
+if(error){
+alert("Error: "+error.message);
+}else{
+alert("Signup Success ✅");
+showPage('loginPage');
+}
+
+}
+
+</script>
+
+</body>
+</html>
