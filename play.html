@@ -99,8 +99,6 @@ font-size:13px;
 <!-- IMAGE -->
 <div id="imageBox" class="hide">
 
-<img src="https://i.imgur.com/8Km9tLL.jpg" width="100%" style="border-radius:10px">
-
 <input type="file" id="imageInput">
 
 <input type="number" id="imageAmount" placeholder="Enter Total Amount">
@@ -187,28 +185,26 @@ alert("Fill all fields");
 return;
 }
 
-// ✅ FIXED UPLOAD
 let fileName=Date.now()+"_"+file.name;
 
+// ✅ सही bucket
 let { error } = await client.storage
-.from("images")
-.upload(fileName, file, {
-contentType: file.type
-});
+.from("screenshots")
+.upload(fileName, file);
 
 if(error){
-alert(error.message); // 👈 ab exact error dikhega
+alert(error.message);
 return;
 }
 
-// public url
+// ✅ public URL
 let { data } = client.storage
-.from("images")
+.from("screenshots")
 .getPublicUrl(fileName);
 
 let imageUrl = data.publicUrl;
 
-// wallet
+// wallet cut
 let {data:userData}=await client.from("login").select("balance").eq("id",user.id).single();
 
 if(userData.balance<amount){
