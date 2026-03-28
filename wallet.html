@@ -33,10 +33,38 @@ input{width:100%;padding:12px;margin-top:10px;border-radius:10px;border:1px soli
 .green{background:#7cc84a;}
 .red{background:#ff4d4d;}
 
-.table-box{background:#fff;border-radius:15px;padding:10px;margin-bottom:20px;}
+/* 🔥 HISTORY BOX FIX */
+.table-box{
+background:#fff;
+border-radius:15px;
+padding:10px;
+margin-bottom:20px;
+max-height:260px;
+overflow-y:auto;
+}
 
-th{background:red;color:#fff;padding:10px;}
-td{padding:8px;text-align:center;border-bottom:1px solid #ccc;}
+/* 🔥 TABLE STYLE */
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+thead{
+position:sticky;
+top:0;
+background:red;
+color:#fff;
+}
+
+th{
+padding:10px;
+}
+
+td{
+padding:8px;
+text-align:center;
+border-bottom:1px solid #ccc;
+}
 
 .hide{display:none;}
 </style>
@@ -78,18 +106,20 @@ td{padding:8px;text-align:center;border-bottom:1px solid #ccc;}
 
 <!-- DEPOSIT HISTORY -->
 <div class="table-box">
-<h3>Deposit History</h3>
-<table width="100%">
+<table>
+<thead>
 <tr><th>ID</th><th>Amount</th><th>Status</th></tr>
+</thead>
 <tbody id="depositHistory"></tbody>
 </table>
 </div>
 
 <!-- WITHDRAW HISTORY -->
 <div class="table-box">
-<h3>Withdraw History</h3>
-<table width="100%">
+<table>
+<thead>
 <tr><th>ID</th><th>Amount</th><th>Status</th></tr>
+</thead>
 <tbody id="withdrawHistory"></tbody>
 </table>
 </div>
