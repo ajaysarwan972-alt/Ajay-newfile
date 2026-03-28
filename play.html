@@ -80,19 +80,9 @@ font-size:13px;
 <div id="typingBox">
 
 <textarea id="typingData" placeholder="Enter your game"></textarea>
-
 <input type="number" id="typingAmount" placeholder="Enter Total Amount">
 
 <div class="submit" onclick="submitTyping()">SUBMIT</div>
-
-<div class="note">
-📢 नोटिस:<br><br>
-अपनी गेम इस प्रकार लिखें: 01 02 03...intu (amount)<br><br>
-आप ₹ या ₹. जैसे चिन्ह का उपयोग कर सकते हैं।<br><br>
-कृपया अपनी गेम का टोटल सही रखें।<br>
-यदि टोटल गलत होता है, तो ऊपर से नंबर का हिसाब किया जाएगा।<br><br>
-जितने पैसे कम होंगे, उतने ही नीचे के नंबरों में पैसे कम कर दिए जाएंगे।
-</div>
 
 </div>
 
@@ -100,19 +90,9 @@ font-size:13px;
 <div id="imageBox" class="hide">
 
 <input type="file" id="imageInput">
-
 <input type="number" id="imageAmount" placeholder="Enter Total Amount">
 
 <div class="submit" onclick="submitImage()">SUBMIT</div>
-
-<div class="note">
-📢 नोटिस:<br><br>
-अपनी पर्ची साफ-साफ भेजें।<br>
-पर्ची में साफ नंबर का ही हिसाब होगा।<br><br>
-कृपया टोटल सही रखें।<br>
-टोटल गलत होने पर ऊपर से नंबर का हिसाब किया जाएगा।<br><br>
-जितने पैसे कम होंगे, उतने ही नीचे के नंबरों में पैसे कम कर दिए जाएंगे।
-</div>
 
 </div>
 
@@ -141,7 +121,9 @@ document.getElementById("imageBox").classList.add("hide");
 document.getElementById(id).classList.remove("hide");
 }
 
-// TYPING
+//////////////////////
+// ✅ TYPING FIXED
+//////////////////////
 async function submitTyping(){
 
 let text=document.getElementById("typingData").value;
@@ -159,22 +141,32 @@ alert("Low balance");
 return;
 }
 
+// wallet cut
 await client.from("login").update({
 balance:data.balance-amount
 }).eq("id",user.id);
 
-await client.from("history").insert([{
+// ✅ FINAL FIX
+let { error } = await client.from("history").insert([{
 user_id:user.id,
 market:market,
-typing:text,
+data:text,      // 👈 typing yaha jayega
+total:amount,   // 👈 amount yaha jayega
 image:null
 }]);
+
+if(error){
+alert(error.message);
+return;
+}
 
 alert("Done");
 location.reload();
 }
 
-// IMAGE
+//////////////////////
+// ✅ IMAGE FIXED
+//////////////////////
 async function submitImage(){
 
 let file=document.getElementById("imageInput").files[0];
@@ -187,7 +179,7 @@ return;
 
 let fileName=Date.now()+"_"+file.name;
 
-// ✅ सही bucket
+// upload
 let { error } = await client.storage
 .from("screenshots")
 .upload(fileName, file);
@@ -197,14 +189,14 @@ alert(error.message);
 return;
 }
 
-// ✅ public URL
+// public url
 let { data } = client.storage
 .from("screenshots")
 .getPublicUrl(fileName);
 
 let imageUrl = data.publicUrl;
 
-// wallet cut
+// wallet
 let {data:userData}=await client.from("login").select("balance").eq("id",user.id).single();
 
 if(userData.balance<amount){
@@ -216,13 +208,19 @@ await client.from("login").update({
 balance:userData.balance-amount
 }).eq("id",user.id);
 
-// insert
-await client.from("history").insert([{
+// ✅ FINAL FIX
+let { error:err2 } = await client.from("history").insert([{
 user_id:user.id,
 market:market,
-typing:null,
+data:null,
+total:amount,
 image:imageUrl
 }]);
+
+if(err2){
+alert(err2.message);
+return;
+}
 
 alert("Done");
 location.reload();
