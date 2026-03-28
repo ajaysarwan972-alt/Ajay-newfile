@@ -69,7 +69,7 @@ input{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;}
 <div class="grid" id="harufGrid2"></div>
 </div>
 
-<!-- CROSSING (FILE SAME) -->
+<!-- CROSSING -->
 <div id="crossing" class="game container">
 
 <label>1ST NUMBER</label>
@@ -87,7 +87,7 @@ input{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;}
 
 </div>
 
-<!-- COPY (FILE SAME) -->
+<!-- COPY -->
 <div id="copy" class="game container">
 
 <label>ENTER DIGIT</label>
@@ -160,7 +160,7 @@ total+=val;
 totalBox();
 }
 
-// CROSSING FULL
+// CROSSING
 function generateCross(){
 let n1=num1.value,n2=num2.value,a=Number(points.value);
 crossGrid.innerHTML="";
@@ -169,44 +169,81 @@ for(let j of n2){
 let pair=i+j;
 dataArr.push({number:pair,amount:a});
 total+=a;
-
 crossGrid.innerHTML+=`<div class="box">${pair}<br>₹${a}</div>`;
 }
 }
 totalBox();
 }
 
-// COPY FULL
-function generateCopy(){
-let d=digits.value,a=Number(amt.value);
-let type=document.querySelector('input[name="p"]:checked').value;
+//////////////////////////////////////////////////
+// 🔥 COPY FIX START
+//////////////////////////////////////////////////
 
-let arr=d.match(/.{1,2}/g);
+let currentMode = "";
+
+function generateCopy(){
+let d = digits.value;
+let a = Number(amt.value);
+let type = document.querySelector('input[name="p"]:checked').value;
+
+if(!d || !a) return alert("Fill data");
+
+// MODE CHANGE = RESET
+if(currentMode !== "" && currentMode !== type){
+table.innerHTML = `<tr><th>NUMBER</th><th>AMOUNT</th><th>DEL</th></tr>`;
+dataArr = [];
+total = 0;
+}
+
+currentMode = type;
+
+let arr = d.match(/.{1,2}/g);
+
 arr.forEach(num=>{
 if(num.length==1) num="0"+num;
 
+// ADD ORIGINAL
+if(!exists(num)){
 addRow(num,a);
+}
 
+// ADD PALTI
 if(type=="with"){
-let rev=num.split("").reverse().join("");
-if(rev!=num) addRow(rev,a);
+let rev = num.split("").reverse().join("");
+
+if(rev!=num && !exists(rev)){
+addRow(rev,a);
+}
 }
 });
+
+totalBox();
+}
+
+function exists(num){
+return dataArr.some(item => item.number === num);
 }
 
 function addRow(num,a){
 dataArr.push({number:num,amount:a});
 total+=a;
 
-table.innerHTML+=`<tr><td>${num}</td><td>${a}</td><td><button onclick="this.parentElement.parentElement.remove()">X</button></td></tr>`;
-totalBox();
+table.innerHTML+=`<tr>
+<td>${num}</td>
+<td>${a}</td>
+<td><button onclick="this.parentElement.parentElement.remove()">X</button></td>
+</tr>`;
 }
+
+//////////////////////////////////////////////////
+// 🔥 COPY FIX END
+//////////////////////////////////////////////////
 
 function totalBox(){
 document.getElementById("total").innerText="₹ "+total;
 }
 
-// FINAL SUBMIT (SAME SYSTEM)
+// SUBMIT
 async function submitAll(){
 if(total<=0){alert("No data");return;}
 
