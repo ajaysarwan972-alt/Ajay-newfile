@@ -75,6 +75,9 @@ body{
     border-radius:15px;
     padding:10px;
     margin-bottom:20px;
+
+    height:200px;          /* 🔥 4 row frame */
+    overflow-y:auto;       /* 🔥 scroll */
 }
 
 table{
@@ -86,6 +89,8 @@ th{
     background:red;
     color:#fff;
     padding:10px;
+    position:sticky;       /* 🔥 header fixed */
+    top:0;
 }
 
 td{
@@ -139,7 +144,7 @@ const client = supabase.createClient(
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
-// ✅ USER LOAD
+// USER
 let user = JSON.parse(localStorage.getItem("user"));
 
 async function loadUser(){
@@ -154,7 +159,7 @@ async function loadUser(){
     document.getElementById("mainBalance").innerText = "₹ " + data.balance;
 }
 
-// ✅ DEPOSIT HISTORY
+// DEPOSIT HISTORY
 async function loadDeposit(){
     let { data } = await client
     .from("deposit_requests")
@@ -174,7 +179,7 @@ async function loadDeposit(){
     depositHistory.innerHTML = html;
 }
 
-// ✅ WITHDRAW HISTORY
+// WITHDRAW HISTORY
 async function loadWithdraw(){
     let { data } = await client
     .from("withdraw_requests")
@@ -194,7 +199,7 @@ async function loadWithdraw(){
     withdrawHistory.innerHTML = html;
 }
 
-// ✅ BUTTON LINKS
+// BUTTON LINKS
 function goDeposit(){
     window.location.href = "Depositwithdrow.html#deposit";
 }
@@ -211,4 +216,4 @@ loadWithdraw();
 </script>
 
 </body>
-      </html>
+</html>
