@@ -11,44 +11,74 @@ body{font-family:Arial;margin:0;background:#f2f2f2;}
 
 .header{
 position:fixed;top:10px;left:10px;right:10px;
-background:#fff;padding:10px;border-radius:20px;
 display:flex;justify-content:space-between;
+padding:10px;
 }
 
-#userId{background:green;color:#fff;padding:5px 10px;border-radius:20px;}
-#wallet{background:red;color:#fff;padding:5px 10px;border-radius:20px;}
+#userId{background:#4CAF50;color:#fff;padding:8px 20px;border-radius:20px;}
+#wallet{background:#ff0000;color:#fff;padding:8px 20px;border-radius:20px;}
 
 .topBtns{
 margin-top:80px;
-display:flex;
-justify-content:space-around;
-}
-
-.topBtn{
-padding:10px;
-border-radius:20px;
-color:#fff;
-cursor:pointer;
-width:23%;
 text-align:center;
 }
 
-.btn1{background:#6c5ce7;}
-.btn2{background:#00b894;}
-.btn3{background:#0984e3;}
-.btn4{background:#e17055;}
+.topBtns button{
+padding:12px 20px;
+margin:5px;
+border:none;
+border-radius:20px;
+background:#e74c3c;
+color:#fff;
+font-weight:bold;
+}
+
+.activeBtn{background:#8BC34A !important;}
 
 .game{display:none;padding:10px;}
 .active{display:block;}
 
-.box{background:#fff;padding:10px;margin:5px;border-radius:10px;text-align:center;}
-input{width:90%;padding:5px;margin-top:5px;}
+.grid{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:10px;
+}
+
+.box{
+background:#fff;
+padding:15px;
+border-radius:10px;
+text-align:center;
+}
+
+.box input{
+width:90%;
+padding:5px;
+margin-top:5px;
+}
 
 .bottom{
-position:fixed;bottom:0;width:100%;display:flex;
+position:fixed;
+bottom:0;
+width:100%;
+display:flex;
 }
-.total{width:50%;background:red;color:#fff;text-align:center;padding:10px;}
-.submit{width:50%;background:green;color:#fff;text-align:center;padding:10px;}
+
+.total{
+width:50%;
+background:linear-gradient(to right,blue,red);
+color:#fff;
+text-align:center;
+padding:15px;
+}
+
+.submit{
+width:50%;
+background:#8BC34A;
+color:#fff;
+text-align:center;
+padding:15px;
+}
 </style>
 </head>
 
@@ -60,37 +90,41 @@ position:fixed;bottom:0;width:100%;display:flex;
 </div>
 
 <div class="topBtns">
-<div class="topBtn btn1" onclick="showGame('jodi')">JODI</div>
-<div class="topBtn btn2" onclick="showGame('haruf')">HARUF</div>
-<div class="topBtn btn3" onclick="showGame('crossing')">CROSSING</div>
-<div class="topBtn btn4" onclick="showGame('copy')">COPY PASTE</div>
+<button id="btn1" onclick="showGame('jodi',this)">JODI</button>
+<button id="btn2" onclick="showGame('haruf',this)">HARUF</button>
+<button id="btn3" onclick="showGame('crossing',this)">CROSSING</button>
+<button id="btn4" onclick="showGame('copy',this)">COPY PASTE</button>
 </div>
 
 <!-- JODI -->
 <div id="jodi" class="game active">
-<div id="jodiGrid"></div>
+<div class="grid" id="jodiGrid"></div>
 </div>
 
 <!-- HARUF -->
 <div id="haruf" class="game">
-<div id="harufGrid"></div>
+<h3>Single Andar</h3>
+<div class="grid" id="harufGrid1"></div>
+
+<h3>Single Bahar</h3>
+<div class="grid" id="harufGrid2"></div>
 </div>
 
 <!-- CROSSING -->
 <div id="crossing" class="game">
-<input id="num1" placeholder="1st number">
-<input id="num2" placeholder="2nd number">
-<input id="points" placeholder="Amount">
-<button onclick="generateCross()">SET</button>
-<div id="crossGrid"></div>
+<input id="c_num1" placeholder="1st number">
+<input id="c_num2" placeholder="2nd number">
+<input id="c_amt" placeholder="Points">
+<button onclick="generateCross()">SUBMIT</button>
 </div>
 
 <!-- COPY -->
 <div id="copy" class="game">
-<input id="digits" placeholder="digits">
-<input id="amt" placeholder="amount">
-<button onclick="generateCopy()">ADD</button>
-<div id="copyList"></div>
+<input id="digits" placeholder="Enter Digit">
+<input id="amt" placeholder="Amount">
+<br><br>
+<label><input type="radio" name="type" value="with" checked> With Palti</label>
+<label><input type="radio" name="type" value="without"> Without Palti</label>
 </div>
 
 <div class="bottom">
@@ -111,10 +145,13 @@ const market = localStorage.getItem("market") || "UNKNOWN";
 let total = 0;
 let dataArr = [];
 
-// SWITCH
-function showGame(id){
+// SWITCH GAME
+function showGame(id,btn){
 document.querySelectorAll(".game").forEach(g=>g.classList.remove("active"));
 document.getElementById(id).classList.add("active");
+
+document.querySelectorAll(".topBtns button").forEach(b=>b.classList.remove("activeBtn"));
+btn.classList.add("activeBtn");
 }
 
 // WALLET
@@ -130,40 +167,35 @@ for(let i=0;i<100;i++){
 let num=i.toString().padStart(2,'0');
 let div=document.createElement("div");
 div.className="box";
-div.innerHTML=`${num}<br><input oninput="calc()">`;
+div.innerHTML=`${num}<br><input oninput="addData('${num}',this.value)">`;
 jodiGrid.appendChild(div);
 }
 
-// HARUF (same logic)
-for(let i=0;i<100;i++){
-let num=i.toString().padStart(2,'0');
+// HARUF
+for(let i=0;i<10;i++){
 let div=document.createElement("div");
 div.className="box";
-div.innerHTML=`${num}<br><input oninput="calc()">`;
-harufGrid.appendChild(div);
+div.innerHTML=`${i}<br><input oninput="addData('${i}',this.value)">`;
+harufGrid1.appendChild(div);
+harufGrid2.appendChild(div.cloneNode(true));
 }
 
-function calc(){
-let inputs=document.querySelectorAll("input");
-total=0;
-dataArr=[];
-inputs.forEach((inp,i)=>{
-let v=Number(inp.value)||0;
-if(v>0){
-dataArr.push({number:i.toString().padStart(2,'0'),amount:v});
-total+=v;
+// ADD DATA
+function addData(num,val){
+val = Number(val)||0;
+if(val>0){
+dataArr.push({number:num,amount:val});
+total+=val;
 }
-});
 document.getElementById("total").innerText="₹ "+total;
 }
 
 // CROSSING
 function generateCross(){
-let n1=num1.value,n2=num2.value,a=Number(points.value);
+let n1=c_num1.value,n2=c_num2.value,a=Number(c_amt.value);
 for(let i of n1){
 for(let j of n2){
-let num=i+j;
-dataArr.push({number:num,amount:a});
+dataArr.push({number:i+j,amount:a});
 total+=a;
 }
 }
@@ -178,7 +210,6 @@ arr.forEach(num=>{
 dataArr.push({number:num,amount:a});
 total+=a;
 });
-document.getElementById("total").innerText="₹ "+total;
 }
 
 // SUBMIT
