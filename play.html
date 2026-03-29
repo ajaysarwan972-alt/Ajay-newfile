@@ -150,7 +150,7 @@ balance:data.balance-amount
 let { error } = await client.from("history").insert([{
 user_id:user.id,
 market:market,
-data:text,      // 👈 typing yaha jayega
+typing:text,,      // 👈 typing yaha jayega
 total:amount,   // 👈 amount yaha jayega
 image:null
 }]);
