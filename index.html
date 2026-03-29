@@ -1,8 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Login / Signup</title>
+
+<!-- 🔥 PWA ADD -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#ff0000">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -108,6 +113,12 @@ display:block;
 
 <script>
 
+// 🔥 SERVICE WORKER REGISTER
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+}
+
+// 🔥 SUPABASE
 const client = supabase.createClient(
 "https://katbdbzoufiblnnsoxkk.supabase.co",
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
