@@ -129,7 +129,7 @@ const market = localStorage.getItem("market") || "UNKNOWN";
 
 let total=0;
 let dataArr=[];
-let inputMap = {}; // ✅ FIX
+let inputMap = {};
 
 function showGame(id){
 document.querySelectorAll(".game").forEach(g=>g.classList.remove("active"));
@@ -143,30 +143,44 @@ userId.innerText="ID: "+user.id;
 }
 loadWallet();
 
+// JODI
 for(let i=0;i<100;i++){
 let num=i.toString().padStart(2,'0');
 jodiGrid.innerHTML+=`<div class="box">${num}<input oninput="add('${num}',this.value)"></div>`;
 }
 
+// HARUF
 for(let i=0;i<10;i++){
 harufGrid1.innerHTML+=`<div class="box">${i}<input oninput="add('${i}',this.value)"></div>`;
 harufGrid2.innerHTML+=`<div class="box">${i}<input oninput="add('${i}',this.value)"></div>`;
 }
 
-// ✅ FIXED TOTAL LOGIC
+// ✅ FINAL FIX
 function add(num,val){
+
 val = Number(val) || 0;
 
+// remove old
 if(inputMap[num]){
 total -= inputMap[num];
 }
 
+// update
 inputMap[num] = val;
 total += val;
+
+// rebuild array
+dataArr = [];
+for(let key in inputMap){
+if(inputMap[key] > 0){
+dataArr.push({number:key,amount:inputMap[key]});
+}
+}
 
 totalBox();
 }
 
+// CROSSING
 function generateCross(){
 let n1=num1.value,n2=num2.value,a=Number(points.value);
 crossGrid.innerHTML="";
@@ -181,11 +195,10 @@ crossGrid.innerHTML+=`<div class="box">${pair}<br>₹${a}</div>`;
 totalBox();
 }
 
-// ✅ COPY FIX
+// COPY FIX
 function generateCopy(){
 let d = digits.value;
 let a = Number(amt.value);
-
 if(!d || !a) return alert("Fill data");
 
 let arr = d.match(/.{1,2}/g);
@@ -210,7 +223,7 @@ totalBox();
 }
 
 function totalBox(){
-document.getElementById("total").innerText="₹ "+total;
+total.innerText="₹ "+total;
 }
 
 async function submitAll(){
