@@ -4,10 +4,10 @@ const MENU_ITEMS = [
 {name:"👤 Profile", link:"profile.html"},
 {name:"💳 UPI Details", link:"deposit.html"},
 {name:"🏦 Bank Details", link:"withdraw.html"},
-{name:"📜 History", link:"userhistory.html"},
 
-{name:"📊 Result", link:"market.html"}, // ✅ LOCAL PAGE
+// ❌ History yaha se hata diya (custom bana रहे हैं)
 
+{name:"📊 Result", link:"market.html"},
 {name:"💰 Winning", link:"userwining.html"},
 {name:"📊 Game Rates", link:"#"},
 {name:"📄 Terms", link:"terms.html"},
@@ -48,6 +48,8 @@ z-index:9998;
 
 // 🔥 MENU ITEMS LOAD
 let html = "";
+
+// 👉 पहले normal items
 MENU_ITEMS.forEach(item=>{
 html += `
 <div style="
@@ -63,6 +65,44 @@ ${item.name}
 `;
 });
 
+// 🔥 👉 CUSTOM HISTORY DROPDOWN ADD
+html += `
+<div style="
+padding:15px;
+margin-top:10px;
+background:#f2f2f2;
+border-radius:12px;
+font-weight:bold;
+cursor:pointer;
+" onclick="toggleHistory()">
+📜 History
+</div>
+
+<div id="historyDropdown" style="display:none; padding-left:10px;">
+    
+    <div style="
+    padding:12px;
+    margin-top:5px;
+    background:#e6e6e6;
+    border-radius:10px;
+    cursor:pointer;
+    " onclick="handleMenu('userhistory.html')">
+    📄 History
+    </div>
+
+    <div style="
+    padding:12px;
+    margin-top:5px;
+    background:#e6e6e6;
+    border-radius:10px;
+    cursor:pointer;
+    " onclick="handleMenu('typinghistory.html')">
+    🖼️ Typing/Image
+    </div>
+
+</div>
+`;
+
 document.getElementById("menuItems").innerHTML = html;
 
 // 🔥 FUNCTIONS
@@ -76,6 +116,13 @@ document.getElementById("sideMenu").style.left = "-100%";
 document.getElementById("overlay").style.display = "none";
 }
 
+// 🔥 DROPDOWN FUNCTION
+function toggleHistory(){
+let box = document.getElementById("historyDropdown");
+box.style.display = (box.style.display === "none") ? "block" : "none";
+}
+
+// 🔥 MENU CLICK
 function handleMenu(link){
 
 // ✅ Game Rates popup
