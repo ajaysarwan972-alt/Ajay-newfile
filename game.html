@@ -8,17 +8,9 @@
 
 <style>
 body{font-family:Arial;margin:0;background:#e5e7eb;}
-
-.header{
-position:fixed;top:10px;left:10px;right:10px;
-background:#fff;padding:10px;border-radius:20px;
-display:flex;justify-content:space-between;
-z-index:999;
-}
-
+.header{position:fixed;top:10px;left:10px;right:10px;background:#fff;padding:10px;border-radius:20px;display:flex;justify-content:space-between;z-index:999;}
 #userId{background:green;color:#fff;padding:6px 12px;border-radius:20px;font-size:12px;}
 #wallet{background:red;color:#fff;padding:6px 12px;border-radius:20px;font-size:12px;}
-
 .topBtns{margin-top:80px;display:flex;justify-content:space-around;}
 .topBtn{width:18%;padding:10px;border-radius:20px;color:#fff;text-align:center;cursor:pointer;font-size:12px;}
 .btn1{background:#6c5ce7;}
@@ -26,16 +18,12 @@ z-index:999;
 .btn3{background:#0984e3;}
 .btn4{background:#e17055;}
 .btn5{background:#111;}
-
 .game{display:none;}
 .active{display:block;}
-
 .container{margin:10px;background:#fff;padding:15px;border-radius:15px;padding-bottom:120px;}
-
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
 .box{background:#fff;padding:10px;border-radius:10px;text-align:center;border:1px solid #ddd;}
 input{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;}
-
 .bottom{position:fixed;bottom:0;width:100%;display:flex;}
 .total{width:50%;background:linear-gradient(to right,blue,red);color:#fff;text-align:center;padding:15px;}
 .submit{width:50%;background:green;color:#fff;text-align:center;padding:15px;}
@@ -57,21 +45,17 @@ input{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;}
 <div class="topBtn btn5" onclick="window.location.href='play.html'">TYP/IMAGE</div>
 </div>
 
-<!-- JODI -->
 <div id="jodi" class="game active container">
 <div class="grid" id="jodiGrid"></div>
 </div>
 
-<!-- HARUF -->
 <div id="haruf" class="game container">
 <h3>Single Andar</h3>
 <div class="grid" id="harufGrid1"></div>
-
 <h3>Single Bahar</h3>
 <div class="grid" id="harufGrid2"></div>
 </div>
 
-<!-- CROSSING -->
 <div id="crossing" class="game container">
 <label>1ST NUMBER</label>
 <input id="num1">
@@ -83,19 +67,13 @@ input{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;}
 <div id="crossGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;"></div>
 </div>
 
-<!-- COPY -->
 <div id="copy" class="game container">
 <label>ENTER DIGIT</label>
 <input id="digits">
 <label>ENTER AMOUNT</label>
 <input id="amt">
 <br><br>
-<label><input type="radio" name="p" value="with" checked> With Palti</label>
-<label><input type="radio" name="p" value="without"> Without Palti</label>
 <button onclick="generateCopy()">ADD</button>
-<table id="table" border="1" width="100%">
-<tr><th>NUMBER</th><th>AMOUNT</th><th>DEL</th></tr>
-</table>
 </div>
 
 <div class="bottom">
@@ -114,7 +92,6 @@ const user = JSON.parse(localStorage.getItem("user"));
 const market = localStorage.getItem("market") || "UNKNOWN";
 
 let dataMap = {};
-let total = 0;
 
 function showGame(id){
 document.querySelectorAll(".game").forEach(g=>g.classList.remove("active"));
@@ -128,21 +105,9 @@ userId.innerText="ID: "+user.id;
 }
 loadWallet();
 
-// JODI
-for(let i=0;i<100;i++){
-let num=i.toString().padStart(2,'0');
-jodiGrid.innerHTML+=`<div class="box">${num}<input oninput="add('${num}',this.value)"></div>`;
-}
-
-// HARUF
-for(let i=0;i<10;i++){
-harufGrid1.innerHTML+=`<div class="box">${i}<input oninput="add('${i}',this.value)"></div>`;
-harufGrid2.innerHTML+=`<div class="box">${i}<input oninput="add('${i}',this.value)"></div>`;
-}
-
-// ✅ FIXED ADD
-function add(num,val){
-val = Number(val) || 0;
+// 🔥 INPUT HANDLER (MAIN FIX)
+function handleInput(num, el){
+let val = parseInt(el.value) || 0;
 
 if(val > 0){
 dataMap[num] = val;
@@ -150,30 +115,40 @@ dataMap[num] = val;
 delete dataMap[num];
 }
 
-calculateTotal();
+updateTotal();
 }
 
-// ✅ TOTAL FIX
-function calculateTotal(){
-total = 0;
+// 🔥 TOTAL FIX
+function updateTotal(){
+let total = 0;
 for(let key in dataMap){
 total += dataMap[key];
 }
-document.getElementById("total").innerText="₹ " + total;
+document.getElementById("total").innerText = "₹ " + total;
+}
+
+// JODI
+for(let i=0;i<100;i++){
+let num=i.toString().padStart(2,'0');
+jodiGrid.innerHTML+=`<div class="box">${num}<input oninput="handleInput('${num}',this)"></div>`;
+}
+
+// HARUF
+for(let i=0;i<10;i++){
+harufGrid1.innerHTML+=`<div class="box">${i}<input oninput="handleInput('${i}',this)"></div>`;
+harufGrid2.innerHTML+=`<div class="box">${i}<input oninput="handleInput('${i}',this)"></div>`;
 }
 
 // CROSSING
 function generateCross(){
 let n1=num1.value,n2=num2.value,a=Number(points.value);
-crossGrid.innerHTML="";
 for(let i of n1){
 for(let j of n2){
 let pair=i+j;
-dataMap[pair] = a;
-crossGrid.innerHTML+=`<div class="box">${pair}<br>₹${a}</div>`;
+dataMap[pair]=a;
 }
 }
-calculateTotal();
+updateTotal();
 }
 
 // COPY
@@ -185,13 +160,21 @@ if(!d || !a) return alert("Fill data");
 let arr = d.match(/.{1,2}/g);
 arr.forEach(num=>{
 if(num.length==1) num="0"+num;
-dataMap[num] = a;
+dataMap[num]=a;
 });
-calculateTotal();
+updateTotal();
 }
 
 // SUBMIT
 async function submitAll(){
+let total = 0;
+let dataArr = [];
+
+for(let key in dataMap){
+total += dataMap[key];
+dataArr.push({number:key,amount:dataMap[key]});
+}
+
 if(total<=0){alert("No data");return;}
 
 let {data}=await client.from("login").select("balance").eq("id",user.id).single();
@@ -199,11 +182,6 @@ let {data}=await client.from("login").select("balance").eq("id",user.id).single(
 if(data.balance<total){
 alert("Low balance");
 return;
-}
-
-let dataArr = [];
-for(let key in dataMap){
-dataArr.push({number:key,amount:dataMap[key]});
 }
 
 await client.from("login").update({balance:data.balance-total}).eq("id",user.id);
