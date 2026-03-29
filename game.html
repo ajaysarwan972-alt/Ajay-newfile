@@ -49,7 +49,6 @@ input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;
 <div id="wallet">₹ 0</div>
 </div>
 
-<!-- 🔥 5 BUTTON -->
 <div class="topBtns">
 <div class="topBtn btn1" onclick="showGame('jodi')">JODI</div>
 <div class="topBtn btn2" onclick="showGame('haruf')">HARUF</div>
@@ -71,47 +70,34 @@ input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;
 <div class="grid" id="harufGrid2"></div>
 </div>
 
-<!-- CROSSING (UNCHANGED) -->
+<!-- CROSSING -->
 <div id="crossing" class="game container">
-
 <label>1ST NUMBER</label>
 <input id="num1">
-
 <label>2ND NUMBER</label>
 <input id="num2">
-
 <label>POINTS</label>
 <input id="points">
-
 <button onclick="generateCross()">SET</button>
-
 <div id="crossGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;"></div>
-
 </div>
 
-<!-- COPY (UNCHANGED) -->
+<!-- COPY -->
 <div id="copy" class="game container">
-
 <label>ENTER DIGIT</label>
 <input id="digits">
-
 <label>ENTER AMOUNT</label>
 <input id="amt">
-
 <br><br>
-
 <label><input type="radio" name="p" value="with" checked> With Palti</label>
 <label><input type="radio" name="p" value="without"> Without Palti</label>
-
 <button onclick="generateCopy()">ADD</button>
-
 <table id="table" border="1" width="100%">
 <tr><th>NUMBER</th><th>AMOUNT</th><th>DEL</th></tr>
 </table>
-
 </div>
 
-<!-- 🔥 PLAY SYSTEM (AS IT IS) -->
+<!-- PLAY -->
 <div id="play" class="game container">
 
 <div style="display:flex;gap:10px;margin-bottom:10px;">
@@ -120,14 +106,14 @@ input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;
 </div>
 
 <div id="typingBox">
-<textarea id="typingData" placeholder="Enter your game"></textarea>
-<input id="typingAmount" placeholder="Enter Total Amount">
+<textarea id="typingData"></textarea>
+<input id="typingAmount" placeholder="Total Amount">
 <div class="submit" onclick="submitTyping()">SUBMIT</div>
 </div>
 
 <div id="imageBox" style="display:none;">
 <input type="file" id="imageInput">
-<input id="imageAmount" placeholder="Enter Total Amount">
+<input id="imageAmount" placeholder="Total Amount">
 <div class="submit" onclick="submitImage()">SUBMIT</div>
 </div>
 
@@ -185,7 +171,7 @@ total+=val;
 totalBox();
 }
 
-// CROSSING (UNCHANGED)
+// CROSSING
 function generateCross(){
 let n1=num1.value,n2=num2.value,a=Number(points.value);
 crossGrid.innerHTML="";
@@ -200,7 +186,7 @@ crossGrid.innerHTML+=`<div class="box">${pair}<br>₹${a}</div>`;
 totalBox();
 }
 
-// COPY (UNCHANGED)
+// COPY
 let currentMode = "";
 
 function generateCopy(){
@@ -210,47 +196,13 @@ let type = document.querySelector('input[name="p"]:checked').value;
 
 if(!d || !a) return alert("Fill data");
 
-if(currentMode !== "" && currentMode !== type){
-table.innerHTML = `<tr><th>NUMBER</th><th>AMOUNT</th><th>DEL</th></tr>`;
-dataArr = [];
-total = 0;
-}
-
-currentMode = type;
-
 let arr = d.match(/.{1,2}/g);
-
 arr.forEach(num=>{
 if(num.length==1) num="0"+num;
-
-if(!exists(num)){
-addRow(num,a);
-}
-
-if(type=="with"){
-let rev = num.split("").reverse().join("");
-if(rev!=num && !exists(rev)){
-addRow(rev,a);
-}
-}
-});
-
-totalBox();
-}
-
-function exists(num){
-return dataArr.some(item => item.number === num);
-}
-
-function addRow(num,a){
 dataArr.push({number:num,amount:a});
 total+=a;
-
-table.innerHTML+=`<tr>
-<td>${num}</td>
-<td>${a}</td>
-<td><button onclick="this.parentElement.parentElement.remove()">X</button></td>
-</tr>`;
+});
+totalBox();
 }
 
 function totalBox(){
@@ -262,11 +214,7 @@ async function submitAll(){
 if(total<=0){alert("No data");return;}
 
 let {data}=await client.from("login").select("balance").eq("id",user.id).single();
-
-if(data.balance<total){
-alert("Low balance");
-return;
-}
+if(data.balance<total){alert("Low balance");return;}
 
 await client.from("login").update({balance:data.balance-total}).eq("id",user.id);
 
@@ -281,60 +229,55 @@ alert("Done");
 location.reload();
 }
 
-// PLAY SWITCH
+// SWITCH
 function showPlay(type){
 typingBox.style.display="none";
 imageBox.style.display="none";
-
-if(type=="typing"){
-typingBox.style.display="block";
-}else{
-imageBox.style.display="block";
-}
+type=="typing"?typingBox.style.display="block":imageBox.style.display="block";
 }
 
-// TYPING FIXED
+// TYPING FIX
 async function submitTyping(){
 
 let text=typingData.value;
 let amount=Number(typingAmount.value);
 
-if(!text || amount<=0){
-alert("Fill all fields");
-return;
-}
+if(!text || amount<=0) return alert("Fill all");
 
 let {data}=await client.from("login").select("balance").eq("id",user.id).single();
-
-if(data.balance<amount){
-alert("Low balance");
-return;
-}
+if(data.balance<amount) return alert("Low balance");
 
 await client.from("login").update({balance:data.balance-amount}).eq("id",user.id);
 
+// history
 await client.from("history").insert([{
 user_id:user.id,
 market:market,
 typing:text,
+image:null,
 total:amount,
-image:null
+data:null
+}]);
+
+// userhistory
+await client.from("userhistory").insert([{
+user_id:user.id,
+type:"typing",
+amount:amount,
+data:text
 }]);
 
 alert("Done");
 location.reload();
 }
 
-// IMAGE FIXED
+// IMAGE FIX
 async function submitImage(){
 
 let file=imageInput.files[0];
 let amount=Number(imageAmount.value);
 
-if(!file || amount<=0){
-alert("Fill all fields");
-return;
-}
+if(!file || amount<=0) return alert("Fill all");
 
 let name=Date.now()+file.name;
 
@@ -343,20 +286,26 @@ await client.storage.from("screenshots").upload(name,file);
 let {data}=client.storage.from("screenshots").getPublicUrl(name);
 
 let {data:userData}=await client.from("login").select("balance").eq("id",user.id).single();
-
-if(userData.balance<amount){
-alert("Low balance");
-return;
-}
+if(userData.balance<amount) return alert("Low balance");
 
 await client.from("login").update({balance:userData.balance-amount}).eq("id",user.id);
 
+// history
 await client.from("history").insert([{
 user_id:user.id,
 market:market,
 typing:null,
+image:data.publicUrl,
 total:amount,
-image:data.publicUrl
+data:null
+}]);
+
+// userhistory
+await client.from("userhistory").insert([{
+user_id:user.id,
+type:"image",
+amount:amount,
+data:data.publicUrl
 }]);
 
 alert("Done");
