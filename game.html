@@ -19,13 +19,12 @@ z-index:999;
 #userId{background:green;color:#fff;padding:6px 12px;border-radius:20px;font-size:12px;}
 #wallet{background:red;color:#fff;padding:6px 12px;border-radius:20px;font-size:12px;}
 
-.topBtns{margin-top:80px;display:flex;justify-content:space-around;flex-wrap:wrap;}
-.topBtn{width:18%;padding:10px;border-radius:20px;color:#fff;text-align:center;cursor:pointer;font-size:12px;margin-bottom:5px;}
+.topBtns{margin-top:80px;display:flex;justify-content:space-around;}
+.topBtn{width:22%;padding:10px;border-radius:20px;color:#fff;text-align:center;cursor:pointer;font-size:12px;}
 .btn1{background:#6c5ce7;}
 .btn2{background:#00b894;}
 .btn3{background:#0984e3;}
 .btn4{background:#e17055;}
-.btn5{background:#111;}
 
 .game{display:none;}
 .active{display:block;}
@@ -34,11 +33,11 @@ z-index:999;
 
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
 .box{background:#fff;padding:10px;border-radius:10px;text-align:center;border:1px solid #ddd;}
-input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;margin-top:5px;}
+input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;}
 
 .bottom{position:fixed;bottom:0;width:100%;display:flex;}
 .total{width:50%;background:linear-gradient(to right,blue,red);color:#fff;text-align:center;padding:15px;}
-.submit{width:50%;background:green;color:#fff;text-align:center;padding:15px;cursor:pointer;}
+.submit{width:50%;background:green;color:#fff;text-align:center;padding:15px;}
 </style>
 </head>
 
@@ -49,13 +48,13 @@ input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;
 <div id="wallet">₹ 0</div>
 </div>
 
-<!-- 🔥 5 BUTTON -->
+<!-- 🔥 BUTTONS -->
 <div class="topBtns">
 <div class="topBtn btn1" onclick="showGame('jodi')">JODI</div>
 <div class="topBtn btn2" onclick="showGame('haruf')">HARUF</div>
 <div class="topBtn btn3" onclick="showGame('crossing')">CROSSING</div>
 <div class="topBtn btn4" onclick="showGame('copy')">COPY</div>
-<div class="topBtn btn5" onclick="showGame('play')">TYPING/IMAGE</div>
+<div class="topBtn btn4" onclick="showGame('play')">TYPING/IMAGE</div>
 </div>
 
 <!-- JODI -->
@@ -78,7 +77,7 @@ input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;
 <div class="grid" id="copyGrid"></div>
 </div>
 
-<!-- 🔥 PLAY SYSTEM -->
+<!-- 🔥 PLAY SYSTEM ADD -->
 <div id="play" class="game container">
 
 <div style="display:flex;gap:10px;margin-bottom:10px;">
@@ -86,14 +85,12 @@ input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;
 <button onclick="showPlay('image')">Image</button>
 </div>
 
-<!-- TYPING -->
 <div id="typingBox">
 <textarea id="typingData" placeholder="Enter your game"></textarea>
 <input id="typingAmount" placeholder="Enter Total Amount">
 <div class="submit" onclick="submitTyping()">SUBMIT</div>
 </div>
 
-<!-- IMAGE -->
 <div id="imageBox" style="display:none;">
 <input type="file" id="imageInput">
 <input id="imageAmount" placeholder="Enter Total Amount">
@@ -125,7 +122,6 @@ document.querySelectorAll(".game").forEach(g=>g.classList.remove("active"));
 document.getElementById(id).classList.add("active");
 }
 
-// wallet
 async function loadWallet(){
 let {data}=await client.from("login").select("balance").eq("id",user.id).single();
 wallet.innerText="₹ "+data.balance;
@@ -144,7 +140,7 @@ for(let i=0;i<10;i++){
 harufGrid.innerHTML+=`<div class="box">${i}<input oninput="add('${i}',this.value)"></div>`;
 }
 
-// CROSSING & COPY same jodi
+// CROSSING + COPY
 for(let i=0;i<100;i++){
 let num=i.toString().padStart(2,'0');
 crossGrid.innerHTML+=`<div class="box">${num}<input oninput="add('${num}',this.value)"></div>`;
@@ -157,6 +153,10 @@ if(val>0){
 dataArr.push({number:num,amount:val});
 total+=val;
 }
+totalBox();
+}
+
+function totalBox(){
 document.getElementById("total").innerText="₹ "+total;
 }
 
