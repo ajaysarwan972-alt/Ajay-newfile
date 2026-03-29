@@ -129,6 +129,7 @@ const market = localStorage.getItem("market") || "UNKNOWN";
 
 let total=0;
 let dataArr=[];
+let inputMap = {}; // ✅ FIX
 
 function showGame(id){
 document.querySelectorAll(".game").forEach(g=>g.classList.remove("active"));
@@ -152,12 +153,17 @@ harufGrid1.innerHTML+=`<div class="box">${i}<input oninput="add('${i}',this.valu
 harufGrid2.innerHTML+=`<div class="box">${i}<input oninput="add('${i}',this.value)"></div>`;
 }
 
+// ✅ FIXED TOTAL LOGIC
 function add(num,val){
-val=Number(val)||0;
-if(val>0){
-dataArr.push({number:num,amount:val});
-total+=val;
+val = Number(val) || 0;
+
+if(inputMap[num]){
+total -= inputMap[num];
 }
+
+inputMap[num] = val;
+total += val;
+
 totalBox();
 }
 
@@ -175,11 +181,10 @@ crossGrid.innerHTML+=`<div class="box">${pair}<br>₹${a}</div>`;
 totalBox();
 }
 
-/* ✅ FIXED COPY */
+// ✅ COPY FIX
 function generateCopy(){
 let d = digits.value;
 let a = Number(amt.value);
-let type = document.querySelector('input[name="p"]:checked').value;
 
 if(!d || !a) return alert("Fill data");
 
@@ -191,14 +196,13 @@ if(num.length==1) num="0"+num;
 dataArr.push({number:num,amount:a});
 total+=a;
 
-// show in table
 let row = document.createElement("tr");
 row.innerHTML = `
 <td>${num}</td>
 <td>${a}</td>
 <td><button onclick="this.parentElement.parentElement.remove()">Delete</button></td>
 `;
-document.getElementById("table").appendChild(row);
+table.appendChild(row);
 
 });
 
