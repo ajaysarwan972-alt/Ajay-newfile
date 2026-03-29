@@ -2,86 +2,94 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>All Games</title>
+<title>Dealer Game</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-body{font-family:Arial;margin:0;background:#e5e7eb;}
-.header{position:fixed;top:10px;left:10px;right:10px;background:#fff;padding:10px;border-radius:20px;display:flex;justify-content:space-between;z-index:999;}
-#userId{background:green;color:#fff;padding:6px 12px;border-radius:20px;font-size:12px;}
-#wallet{background:red;color:#fff;padding:6px 12px;border-radius:20px;font-size:12px;}
-.topBtns{margin-top:80px;display:flex;justify-content:space-around;}
-.topBtn{width:18%;padding:10px;border-radius:20px;color:#fff;text-align:center;cursor:pointer;font-size:12px;}
-.btn1{background:#6c5ce7;}
-.btn2{background:#00b894;}
-.btn3{background:#0984e3;}
-.btn4{background:#e17055;}
-.btn5{background:#111;}
-.game{display:none;}
-.active{display:block;}
-.container{margin:10px;background:#fff;padding:15px;border-radius:15px;padding-bottom:120px;}
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
-.box{background:#fff;padding:10px;border-radius:10px;text-align:center;border:1px solid #ddd;}
-input{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;}
-.bottom{position:fixed;bottom:0;width:100%;display:flex;}
-.total{width:50%;background:linear-gradient(to right,blue,red);color:#fff;text-align:center;padding:15px;}
-.submit{width:50%;background:green;color:#fff;text-align:center;padding:15px;}
+body{margin:0;background:#0b0f1a;font-family:Arial;color:#fff;}
+
+#dealerId{
+position:fixed;
+left:10px;
+top:10px;
+background:green;
+padding:6px 12px;
+border-radius:20px;
+}
+
+#wallet{
+position:fixed;
+right:10px;
+top:10px;
+background:red;
+padding:6px 12px;
+border-radius:20px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(10,1fr);
+gap:6px;
+padding:10px;
+margin-top:60px;
+}
+
+.box{
+border:1px solid #333;
+border-radius:8px;
+padding:6px;
+text-align:center;
+}
+
+.num{color:#00e5ff;font-size:14px;}
+.amt{font-size:13px;margin-top:4px;}
+
+/* ✅ NEW SMALL BOX SECTION */
+.section{
+padding:10px;
+}
+
+.title{
+margin:10px 0;
+font-size:16px;
+font-weight:bold;
+}
+
+.smallGrid{
+display:grid;
+grid-template-columns:repeat(5,1fr);
+gap:8px;
+}
+
+.sbox{
+background:#111;
+border-radius:10px;
+padding:8px;
+text-align:center;
+}
+
+.snum{font-size:14px;color:#00e5ff;}
+.samt{font-size:12px;margin-top:3px;}
 </style>
 </head>
 
 <body>
 
-<div class="header">
-<div id="userId">ID: 0</div>
+<div id="dealerId">ID</div>
 <div id="wallet">₹ 0</div>
-</div>
 
-<div class="topBtns">
-<div class="topBtn btn1" onclick="showGame('jodi')">JODI</div>
-<div class="topBtn btn2" onclick="showGame('haruf')">HARUF</div>
-<div class="topBtn btn3" onclick="showGame('crossing')">CROSSING</div>
-<div class="topBtn btn4" onclick="showGame('copy')">COPY</div>
-<div class="topBtn btn5" onclick="window.location.href='play.html'">TYP/IMAGE</div>
-</div>
+<div class="grid" id="grid"></div>
 
-<div id="jodi" class="game active container">
-<div class="grid" id="jodiGrid"></div>
-</div>
+<!-- ✅ NEW -->
+<div class="section">
 
-<div id="haruf" class="game container">
-<h3>Single Andar</h3>
-<div class="grid" id="harufGrid1"></div>
-<h3>Single Bahar</h3>
-<div class="grid" id="harufGrid2"></div>
-</div>
+<div class="title">Single Andar</div>
+<div class="smallGrid" id="andar"></div>
 
-<div id="crossing" class="game container">
-<label>1ST NUMBER</label>
-<input id="num1">
-<label>2ND NUMBER</label>
-<input id="num2">
-<label>POINTS</label>
-<input id="points">
-<button onclick="generateCross()">SET</button>
+<div class="title">Single Bahar</div>
+<div class="smallGrid" id="bahar"></div>
 
-<div id="crossGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;"></div>
-</div>
-
-<div id="copy" class="game container">
-<label>ENTER DIGIT</label>
-<input id="digits">
-<label>ENTER AMOUNT</label>
-<input id="amt">
-<br><br>
-<button onclick="generateCopy()">ADD</button>
-
-<div id="copyGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;"></div>
-</div>
-
-<div class="bottom">
-<div class="total" id="total">₹ 0</div>
-<div class="submit" onclick="submitAll()">SUBMIT</div>
 </div>
 
 <script>
@@ -91,141 +99,110 @@ const client = supabase.createClient(
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
-const user = JSON.parse(localStorage.getItem("user"));
-const market = localStorage.getItem("market") || "UNKNOWN";
+const dealer = JSON.parse(localStorage.getItem("dealer"));
 
-let dataMap = {};
+// ✅ TOP DATA
+async function loadTop(){
+let {data} = await client
+.from("dealers")
+.select("balance")
+.eq("id", dealer.id)
+.single();
 
-function showGame(id){
-document.querySelectorAll(".game").forEach(g=>g.classList.remove("active"));
-document.getElementById(id).classList.add("active");
+wallet.innerText = "₹ " + data.balance;
+dealerId.innerText = "ID: " + dealer.id;
 }
+loadTop();
 
-async function loadWallet(){
-let {data}=await client.from("login").select("balance").eq("id",user.id).single();
-wallet.innerText="₹ "+data.balance;
-userId.innerText="ID: "+user.id;
-}
-loadWallet();
-
-function handleInput(num, el){
-let val = parseInt(el.value) || 0;
-if(val > 0){ dataMap[num] = val; }
-else{ delete dataMap[num]; }
-updateTotal();
-}
-
-function updateTotal(){
-let total = 0;
-for(let key in dataMap){ total += dataMap[key]; }
-document.getElementById("total").innerText = "₹ " + total;
-}
-
-// JODI
+// ✅ MAIN GRID
 for(let i=0;i<100;i++){
 let num=i.toString().padStart(2,'0');
-jodiGrid.innerHTML+=`<div class="box">${num}<input oninput="handleInput('${num}',this)"></div>`;
+
+grid.innerHTML+=`
+<div class="box">
+<div class="num">${num}</div>
+<div class="amt" id="amt_${num}"></div>
+</div>
+`;
 }
 
-// HARUF
+// ✅ SMALL BOX CREATE
 for(let i=0;i<10;i++){
-harufGrid1.innerHTML+=`<div class="box">${i}<input oninput="handleInput('${i}',this)"></div>`;
-harufGrid2.innerHTML+=`<div class="box">${i}<input oninput="handleInput('${i}',this)"></div>`;
-}
 
-// ✅ CROSSING FINAL FIX
-function generateCross(){
-let n1 = num1.value.trim();
-let n2 = num2.value.trim();
-let a = Number(points.value);
+andar.innerHTML+=`
+<div class="sbox">
+<div class="snum">${i}</div>
+<div class="samt" id="andar_${i}"></div>
+</div>
+`;
 
-if(!n1 || !n2 || !a){
-alert("Sab fill kar");
-return;
-}
-
-let box = document.getElementById("crossGrid");
-box.innerHTML = "";
-
-for(let i of n1){
-for(let j of n2){
-
-if(isNaN(i) || isNaN(j)) continue;
-
-let pair = i + j;
-dataMap[pair] = a;
-
-let div = document.createElement("div");
-div.className = "box";
-div.innerHTML = `<b style="color:red">${pair}</b><br>₹ ${a}`;
-box.appendChild(div);
+bahar.innerHTML+=`
+<div class="sbox">
+<div class="snum">${i}</div>
+<div class="samt" id="bahar_${i}"></div>
+</div>
+`;
 
 }
-}
 
-updateTotal();
-}
 
-// ✅ COPY FINAL FIX
-function generateCopy(){
-let d = digits.value.replace(/\s+/g,'');
-let a = Number(amt.value);
+// ✅ DATA LOAD
+async function loadData(){
 
-if(!d || !a){
-alert("Fill data");
-return;
-}
+let {data} = await client.from("history").select("data");
 
-let box = document.getElementById("copyGrid");
-box.innerHTML = "";
+let map = {};
+let andarMap = {};
+let baharMap = {};
 
-let arr = d.match(/.{1,2}/g);
+data.forEach(row=>{
 
-arr.forEach(num=>{
-if(num.length==1) num="0"+num;
+let arr = JSON.parse(row.data);
 
-dataMap[num] = a;
+arr.forEach(item=>{
 
-let item = document.createElement("div");
-item.className = "box";
-item.innerHTML = `<b style="color:red">${num}</b><br>₹ ${a}`;
-box.appendChild(item);
+let num = item.number;
+let amt = item.amount;
+
+// main
+if(!map[num]) map[num]=0;
+map[num]+=amt;
+
+// andar (last digit)
+let a = num % 10;
+if(!andarMap[a]) andarMap[a]=0;
+andarMap[a]+=amt;
+
+// bahar (first digit)
+let b = Math.floor(num/10);
+if(!baharMap[b]) baharMap[b]=0;
+baharMap[b]+=amt;
+
 });
 
-updateTotal();
+});
+
+// fill main
+for(let num in map){
+let el = document.getElementById("amt_"+num);
+if(el) el.innerText = map[num];
 }
 
-// SUBMIT
-async function submitAll(){
-let total = 0;
-let dataArr = [];
-
-for(let key in dataMap){
-total += dataMap[key];
-dataArr.push({number:key,amount:dataMap[key]});
+// fill andar
+for(let i in andarMap){
+let el = document.getElementById("andar_"+i);
+if(el) el.innerText = andarMap[i];
 }
 
-if(total<=0){alert("No data");return;}
-
-let {data}=await client.from("login").select("balance").eq("id",user.id).single();
-
-if(data.balance<total){
-alert("Low balance");
-return;
+// fill bahar
+for(let i in baharMap){
+let el = document.getElementById("bahar_"+i);
+if(el) el.innerText = baharMap[i];
 }
 
-await client.from("login").update({balance:data.balance-total}).eq("id",user.id);
-
-await client.from("history").insert([{
-user_id:user.id,
-market:market,
-data:JSON.stringify(dataArr),
-total:total
-}]);
-
-alert("Done");
-location.reload();
 }
+
+loadData();
 
 </script>
 
