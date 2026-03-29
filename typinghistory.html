@@ -22,7 +22,7 @@ border-radius:10px;
 
 img{
 width:100%;
-height:auto; /* 👈 पूरी image दिखे */
+height:auto;
 border-radius:10px;
 margin-top:10px;
 }
@@ -34,7 +34,6 @@ padding:8px;
 border-radius:8px;
 margin-top:10px;
 }
-
 </style>
 </head>
 
@@ -58,27 +57,41 @@ const user = JSON.parse(localStorage.getItem("user"));
 // 🔥 LOAD HISTORY
 async function loadHistory(){
 
-let {data} = await client
+let {data, error} = await client
 .from("typing_image")
 .select("*")
-.eq("user_id", user.id)   // 👈 सिर्फ उसी user की entry
+.eq("user_id", user.id)
 .order("id",{ascending:false});
 
-userId.innerText="ID: "+user.id;
+if(error){
+alert("Error loading data");
+console.log(error);
+return;
+}
+
+document.getElementById("userId").innerText="ID: "+user.id;
 
 let html="";
 
 data.forEach(item=>{
+
+let date = item.created_at 
+? new Date(item.created_at).toLocaleString() 
+: "N/A";
 
 html+=`
 <div class="card">
 
 <div><b>${item.market}</b></div>
 
+<div style="font-size:12px;color:gray;margin-top:5px;">
+${date}
+</div>
+
 ${
 item.data && item.data.includes("http")
-? `<img src="${item.data}">`   // 👈 full image
-: `<div class="text">${item.data}</div>`
+? `<img src="${item.data}">`
+: `<div class="text">${item.data || ""}</div>`
 }
 
 <div style="margin-top:10px;font-weight:bold;color:green;">
