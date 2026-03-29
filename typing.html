@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{font-family:Arial;margin:0;background:#f1f5f9;}
+
+.header{
+display:flex;justify-content:space-between;
+padding:10px;background:#fff;
+}
+
+.boxBtn{
+display:flex;gap:10px;padding:10px;
+}
+
+.btn{
+flex:1;padding:12px;
+border-radius:10px;
+text-align:center;
+color:#fff;font-weight:bold;
+cursor:pointer;
+}
+
+.typing{background:#3b82f6;}
+.image{background:#10b981;}
+
+.container{
+padding:15px;
+}
+
+input,textarea{
+width:100%;
+padding:10px;
+margin-top:10px;
+border-radius:10px;
+border:1px solid #ccc;
+}
+
+.submit{
+background:green;
+color:#fff;
+padding:12px;
+margin-top:10px;
+border-radius:10px;
+text-align:center;
+cursor:pointer;
+}
+
+.note{
+background:#fff3cd;
+padding:10px;
+margin-top:15px;
+border-radius:10px;
+font-size:13px;
+}
+
+.hide{display:none;}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+<div id="userId">ID: 0</div>
+<div id="wallet">₹ 0</div>
+</div>
+
+<div class="boxBtn">
+<div class="btn typing" onclick="showBox('typingBox')">Typing Game</div>
+<div class="btn image" onclick="showBox('imageBox')">Image Game</div>
+</div>
+
+<div class="container">
+
+<!-- TYPING -->
+<div id="typingBox">
+
+<textarea id="typingData" placeholder="Enter your game"></textarea>
+<input type="number" id="typingAmount" placeholder="Enter Total Amount">
+
+<div class="submit" onclick="submitTyping()">SUBMIT</div>
+
+</div>
+
+<!-- IMAGE -->
+<div id="imageBox" class="hide">
+
+<input type="file" id="imageInput">
+<input type="number" id="imageAmount" placeholder="Enter Total Amount">
+
+<div class="submit" onclick="submitImage()">SUBMIT</div>
+
+</div>
+
+<!-- 🔥 NOTICE -->
+<div class="note">
+📢 नोटिस:<br><br>
+
+अपनी गेम साफ-साफ लिखें।<br><br>
+
+Typing में इस प्रकार लिखें: 01 02 03 (amount)<br><br>
+
+आप ₹ या ₹. जैसे चिन्ह का उपयोग कर सकते हैं।<br><br>
+
+Image में साफ पर्ची ही अपलोड करें।<br><br>
+
+कृपया टोटल सही रखें।<br>
+टोटल गलत होने पर ऊपर से हिसाब किया जाएगा।<br><br>
+
+जितने पैसे कम होंगे, उतने नीचे के नंबरों में पैसे कम कर दिए जाएंगे।
+</div>
+
+</div>
+
+<script>
+
+const client = supabase.createClient(
+"https://katbdbzoufiblnnsoxkk.supabase.co",
+"sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
+);
+
+const user = JSON.parse(localStorage.getItem("user"));
+const market = localStorage.getItem("market");
+
+// wallet load
+async function loadWallet(){
+let {data}=await client.from("login").select("balance").eq("id",user.id).single();
+wallet.innerText="₹ "+data.balance;
+userId.innerText="ID: "+user.id;
+}
+loadWallet();
+
+// switch
+function showBox(id){
+document.getElementById("typingBox").classList.add("hide");
+document.getElementById("imageBox").classList.add("hide");
+document.getElementById(id).classList.remove("hide");
+}
+
+// 🔥 TYPING
+async function submitTyping(){
+
+let text=document.getElementById("typingData").value;
+let amount=Number(document.getElementById("typingAmount").value);
+
+if(!text || amount<=0){
+alert("Fill all fields");
+return;
+}
+
+let {data}=await client.from("login").select("balance").eq("id",user.id).single();
+
+if(data.balance<amount){
+alert("Low balance");
+return;
+}
+
+// wallet cut
+await client.from("login").update({
+balance:data.balance-amount
+}).eq("id",user.id);
+
+// save
+await client.from("typing_image").insert([{
+user_id:user.id,
+market:market,
+data:text,
+total:amount
+}]);
+
+alert("Done");
+location.reload();
+}
+
+// 🔥 IMAGE
+async function submitImage(){
+
+let file=document.getElementById("imageInput").files[0];
+let amount=Number(document.getElementById("imageAmount").value);
+
+if(!file || amount<=0){
+alert("Fill all fields");
+return;
+}
+
+let fileName=Date.now()+"_"+file.name;
+
+// upload
+let { error } = await client.storage
+.from("screenshots")
+.upload(fileName, file);
+
+if(error){
+alert(error.message);
+return;
+}
+
+// public url
+let { data } = client.storage
+.from("screenshots")
+.getPublicUrl(fileName);
+
+let imageUrl = data.publicUrl;
+
+// wallet
+let {data:userData}=await client.from("login").select("balance").eq("id",user.id).single();
+
+if(userData.balance<amount){
+alert("Low balance");
+return;
+}
+
+// wallet cut
+await client.from("login").update({
+balance:userData.balance-amount
+}).eq("id",user.id);
+
+// save
+await client.from("typing_image").insert([{
+user_id:user.id,
+market:market,
+data:imageUrl,
+total:amount
+}]);
+
+alert("Done");
+location.reload();
+}
+
+</script>
+
+</body>
+</html>
