@@ -57,12 +57,10 @@ input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;
 <div class="topBtn btn5" onclick="showGame('play')">TYPING/IMAGE</div>
 </div>
 
-<!-- JODI -->
 <div id="jodi" class="game active container">
 <div class="grid" id="jodiGrid"></div>
 </div>
 
-<!-- HARUF -->
 <div id="haruf" class="game container">
 <h3>Single Andar</h3>
 <div class="grid" id="harufGrid1"></div>
@@ -70,7 +68,6 @@ input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;
 <div class="grid" id="harufGrid2"></div>
 </div>
 
-<!-- CROSSING -->
 <div id="crossing" class="game container">
 <label>1ST NUMBER</label>
 <input id="num1">
@@ -82,7 +79,6 @@ input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;
 <div id="crossGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;"></div>
 </div>
 
-<!-- COPY -->
 <div id="copy" class="game container">
 <label>ENTER DIGIT</label>
 <input id="digits">
@@ -97,9 +93,7 @@ input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;
 </table>
 </div>
 
-<!-- PLAY -->
 <div id="play" class="game container">
-
 <div style="display:flex;gap:10px;margin-bottom:10px;">
 <button onclick="showPlay('typing')">Typing</button>
 <button onclick="showPlay('image')">Image</button>
@@ -116,7 +110,6 @@ input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;
 <input id="imageAmount" placeholder="Total Amount">
 <div class="submit" onclick="submitImage()">SUBMIT</div>
 </div>
-
 </div>
 
 <div class="bottom">
@@ -142,7 +135,6 @@ document.querySelectorAll(".game").forEach(g=>g.classList.remove("active"));
 document.getElementById(id).classList.add("active");
 }
 
-// wallet
 async function loadWallet(){
 let {data}=await client.from("login").select("balance").eq("id",user.id).single();
 wallet.innerText="₹ "+data.balance;
@@ -150,13 +142,11 @@ userId.innerText="ID: "+user.id;
 }
 loadWallet();
 
-// JODI
 for(let i=0;i<100;i++){
 let num=i.toString().padStart(2,'0');
 jodiGrid.innerHTML+=`<div class="box">${num}<input oninput="add('${num}',this.value)"></div>`;
 }
 
-// HARUF
 for(let i=0;i<10;i++){
 harufGrid1.innerHTML+=`<div class="box">${i}<input oninput="add('${i}',this.value)"></div>`;
 harufGrid2.innerHTML+=`<div class="box">${i}<input oninput="add('${i}',this.value)"></div>`;
@@ -171,7 +161,6 @@ total+=val;
 totalBox();
 }
 
-// CROSSING
 function generateCross(){
 let n1=num1.value,n2=num2.value,a=Number(points.value);
 crossGrid.innerHTML="";
@@ -186,9 +175,7 @@ crossGrid.innerHTML+=`<div class="box">${pair}<br>₹${a}</div>`;
 totalBox();
 }
 
-// COPY
-let currentMode = "";
-
+/* ✅ FIXED COPY */
 function generateCopy(){
 let d = digits.value;
 let a = Number(amt.value);
@@ -197,11 +184,24 @@ let type = document.querySelector('input[name="p"]:checked').value;
 if(!d || !a) return alert("Fill data");
 
 let arr = d.match(/.{1,2}/g);
+
 arr.forEach(num=>{
 if(num.length==1) num="0"+num;
+
 dataArr.push({number:num,amount:a});
 total+=a;
+
+// show in table
+let row = document.createElement("tr");
+row.innerHTML = `
+<td>${num}</td>
+<td>${a}</td>
+<td><button onclick="this.parentElement.parentElement.remove()">Delete</button></td>
+`;
+document.getElementById("table").appendChild(row);
+
 });
+
 totalBox();
 }
 
@@ -209,7 +209,6 @@ function totalBox(){
 document.getElementById("total").innerText="₹ "+total;
 }
 
-// SUBMIT GAME
 async function submitAll(){
 if(total<=0){alert("No data");return;}
 
@@ -229,19 +228,15 @@ alert("Done");
 location.reload();
 }
 
-// SWITCH
 function showPlay(type){
 typingBox.style.display="none";
 imageBox.style.display="none";
 type=="typing"?typingBox.style.display="block":imageBox.style.display="block";
 }
 
-// TYPING FIX
 async function submitTyping(){
-
 let text=typingData.value;
 let amount=Number(typingAmount.value);
-
 if(!text || amount<=0) return alert("Fill all");
 
 let {data}=await client.from("login").select("balance").eq("id",user.id).single();
@@ -249,7 +244,6 @@ if(data.balance<amount) return alert("Low balance");
 
 await client.from("login").update({balance:data.balance-amount}).eq("id",user.id);
 
-// history
 await client.from("history").insert([{
 user_id:user.id,
 market:market,
@@ -259,7 +253,6 @@ total:amount,
 data:null
 }]);
 
-// userhistory
 await client.from("userhistory").insert([{
 user_id:user.id,
 type:"typing",
@@ -271,16 +264,12 @@ alert("Done");
 location.reload();
 }
 
-// IMAGE FIX
 async function submitImage(){
-
 let file=imageInput.files[0];
 let amount=Number(imageAmount.value);
-
 if(!file || amount<=0) return alert("Fill all");
 
 let name=Date.now()+file.name;
-
 await client.storage.from("screenshots").upload(name,file);
 
 let {data}=client.storage.from("screenshots").getPublicUrl(name);
@@ -290,7 +279,6 @@ if(userData.balance<amount) return alert("Low balance");
 
 await client.from("login").update({balance:userData.balance-amount}).eq("id",user.id);
 
-// history
 await client.from("history").insert([{
 user_id:user.id,
 market:market,
@@ -300,7 +288,6 @@ total:amount,
 data:null
 }]);
 
-// userhistory
 await client.from("userhistory").insert([{
 user_id:user.id,
 type:"image",
