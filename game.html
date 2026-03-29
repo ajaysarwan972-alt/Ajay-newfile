@@ -20,12 +20,11 @@ z-index:999;
 #wallet{background:red;color:#fff;padding:6px 12px;border-radius:20px;font-size:12px;}
 
 .topBtns{margin-top:80px;display:flex;justify-content:space-around;}
-.topBtn{width:18%;padding:10px;border-radius:20px;color:#fff;text-align:center;cursor:pointer;font-size:12px;}
+.topBtn{width:22%;padding:10px;border-radius:20px;color:#fff;text-align:center;cursor:pointer;font-size:12px;}
 .btn1{background:#6c5ce7;}
 .btn2{background:#00b894;}
 .btn3{background:#0984e3;}
 .btn4{background:#e17055;}
-.btn5{background:#111;}
 
 .game{display:none;}
 .active{display:block;}
@@ -34,7 +33,7 @@ z-index:999;
 
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
 .box{background:#fff;padding:10px;border-radius:10px;text-align:center;border:1px solid #ddd;}
-input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;}
+input{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;}
 
 .bottom{position:fixed;bottom:0;width:100%;display:flex;}
 .total{width:50%;background:linear-gradient(to right,blue,red);color:#fff;text-align:center;padding:15px;}
@@ -49,13 +48,14 @@ input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;
 <div id="wallet">₹ 0</div>
 </div>
 
-<!-- 🔥 5 BUTTON -->
 <div class="topBtns">
 <div class="topBtn btn1" onclick="showGame('jodi')">JODI</div>
 <div class="topBtn btn2" onclick="showGame('haruf')">HARUF</div>
 <div class="topBtn btn3" onclick="showGame('crossing')">CROSSING</div>
 <div class="topBtn btn4" onclick="showGame('copy')">COPY</div>
-<div class="topBtn btn5" onclick="showGame('play')">TYPING/IMAGE</div>
+
+<!-- ✅ NEW BUTTON -->
+<div class="topBtn" style="background:#fd7e14;" onclick="openTyping()">TYPING/IMAGE</div>
 </div>
 
 <!-- JODI -->
@@ -67,11 +67,12 @@ input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;
 <div id="haruf" class="game container">
 <h3>Single Andar</h3>
 <div class="grid" id="harufGrid1"></div>
+
 <h3>Single Bahar</h3>
 <div class="grid" id="harufGrid2"></div>
 </div>
 
-<!-- CROSSING (UNCHANGED) -->
+<!-- CROSSING -->
 <div id="crossing" class="game container">
 
 <label>1ST NUMBER</label>
@@ -89,7 +90,7 @@ input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;
 
 </div>
 
-<!-- COPY (UNCHANGED) -->
+<!-- COPY -->
 <div id="copy" class="game container">
 
 <label>ENTER DIGIT</label>
@@ -108,28 +109,6 @@ input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;
 <table id="table" border="1" width="100%">
 <tr><th>NUMBER</th><th>AMOUNT</th><th>DEL</th></tr>
 </table>
-
-</div>
-
-<!-- 🔥 PLAY SYSTEM (AS IT IS) -->
-<div id="play" class="game container">
-
-<div style="display:flex;gap:10px;margin-bottom:10px;">
-<button onclick="showPlay('typing')">Typing</button>
-<button onclick="showPlay('image')">Image</button>
-</div>
-
-<div id="typingBox">
-<textarea id="typingData" placeholder="Enter your game"></textarea>
-<input id="typingAmount" placeholder="Enter Total Amount">
-<div class="submit" onclick="submitTyping()">SUBMIT</div>
-</div>
-
-<div id="imageBox" style="display:none;">
-<input type="file" id="imageInput">
-<input id="imageAmount" placeholder="Enter Total Amount">
-<div class="submit" onclick="submitImage()">SUBMIT</div>
-</div>
 
 </div>
 
@@ -156,7 +135,11 @@ document.querySelectorAll(".game").forEach(g=>g.classList.remove("active"));
 document.getElementById(id).classList.add("active");
 }
 
-// wallet
+// ✅ NEW FUNCTION
+function openTyping(){
+window.location.href = "play.html";
+}
+
 async function loadWallet(){
 let {data}=await client.from("login").select("balance").eq("id",user.id).single();
 wallet.innerText="₹ "+data.balance;
@@ -185,7 +168,7 @@ total+=val;
 totalBox();
 }
 
-// CROSSING (UNCHANGED)
+// CROSSING
 function generateCross(){
 let n1=num1.value,n2=num2.value,a=Number(points.value);
 crossGrid.innerHTML="";
@@ -200,7 +183,7 @@ crossGrid.innerHTML+=`<div class="box">${pair}<br>₹${a}</div>`;
 totalBox();
 }
 
-// COPY (UNCHANGED)
+// COPY
 let currentMode = "";
 
 function generateCopy(){
@@ -229,6 +212,7 @@ addRow(num,a);
 
 if(type=="with"){
 let rev = num.split("").reverse().join("");
+
 if(rev!=num && !exists(rev)){
 addRow(rev,a);
 }
@@ -257,7 +241,7 @@ function totalBox(){
 document.getElementById("total").innerText="₹ "+total;
 }
 
-// SUBMIT GAME
+// SUBMIT
 async function submitAll(){
 if(total<=0){alert("No data");return;}
 
@@ -275,88 +259,6 @@ user_id:user.id,
 market:market,
 data:JSON.stringify(dataArr),
 total:total
-}]);
-
-alert("Done");
-location.reload();
-}
-
-// PLAY SWITCH
-function showPlay(type){
-typingBox.style.display="none";
-imageBox.style.display="none";
-
-if(type=="typing"){
-typingBox.style.display="block";
-}else{
-imageBox.style.display="block";
-}
-}
-
-// TYPING FIXED
-async function submitTyping(){
-
-let text=typingData.value;
-let amount=Number(typingAmount.value);
-
-if(!text || amount<=0){
-alert("Fill all fields");
-return;
-}
-
-let {data}=await client.from("login").select("balance").eq("id",user.id).single();
-
-if(data.balance<amount){
-alert("Low balance");
-return;
-}
-
-await client.from("login").update({balance:data.balance-amount}).eq("id",user.id);
-
-await client.from("history").insert([{
-user_id:user.id,
-market:market,
-typing:text,
-total:amount,
-image:null
-}]);
-
-alert("Done");
-location.reload();
-}
-
-// IMAGE FIXED
-async function submitImage(){
-
-let file=imageInput.files[0];
-let amount=Number(imageAmount.value);
-
-if(!file || amount<=0){
-alert("Fill all fields");
-return;
-}
-
-let name=Date.now()+file.name;
-
-await client.storage.from("screenshots").upload(name,file);
-
-let {data}=client.storage.from("screenshots").getPublicUrl(name);
-
-let {data:userData}=await client.from("login").select("balance").eq("id",user.id).single();
-
-if(userData.balance<amount){
-alert("Low balance");
-return;
-}
-
-await client.from("login").update({balance:userData.balance-amount}).eq("id",user.id);
-
-await client.from("history").insert([{
-user_id:user.id,
-market:market,
-typing:null,
-total:amount,
-image:data.publicUrl
 }]);
 
 alert("Done");
