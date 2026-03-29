@@ -5,8 +5,6 @@ const MENU_ITEMS = [
 {name:"💳 UPI Details", link:"deposit.html"},
 {name:"🏦 Bank Details", link:"withdraw.html"},
 
-// ❌ History yaha se hata diya (custom bana रहे हैं)
-
 {name:"📊 Result", link:"market.html"},
 {name:"💰 Winning", link:"userwining.html"},
 {name:"📊 Game Rates", link:"#"},
@@ -46,11 +44,12 @@ z-index:9998;
 "></div>
 `);
 
-// 🔥 MENU ITEMS LOAD
+// 🔥 MENU LOAD
 let html = "";
 
-// 👉 पहले normal items
 MENU_ITEMS.forEach(item=>{
+
+// normal item
 html += `
 <div style="
 padding:15px;
@@ -63,9 +62,9 @@ cursor:pointer;
 ${item.name}
 </div>
 `;
-});
 
-// 🔥 👉 CUSTOM HISTORY DROPDOWN ADD
+// 👉 Bank Details ke baad History dropdown add
+if(item.name.includes("Bank Details")){
 html += `
 <div style="
 padding:15px;
@@ -102,6 +101,9 @@ cursor:pointer;
 
 </div>
 `;
+}
+
+});
 
 document.getElementById("menuItems").innerHTML = html;
 
@@ -116,7 +118,7 @@ document.getElementById("sideMenu").style.left = "-100%";
 document.getElementById("overlay").style.display = "none";
 }
 
-// 🔥 DROPDOWN FUNCTION
+// 🔥 DROPDOWN
 function toggleHistory(){
 let box = document.getElementById("historyDropdown");
 box.style.display = (box.style.display === "none") ? "block" : "none";
@@ -125,13 +127,11 @@ box.style.display = (box.style.display === "none") ? "block" : "none";
 // 🔥 MENU CLICK
 function handleMenu(link){
 
-// ✅ Game Rates popup
 if(link === "#"){
 alert("RATE LIST:-*\n\n• जोड़ी रेट: 1 ke 90, 10 ke 950\n\n• हर्फ़ रेट: 10 ke 90, 100 ke 950");
 return;
 }
 
-// logout
 if(link === "logout"){
 localStorage.removeItem("user");
 window.location.href = "index.html";
