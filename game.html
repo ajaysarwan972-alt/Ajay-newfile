@@ -20,11 +20,12 @@ z-index:999;
 #wallet{background:red;color:#fff;padding:6px 12px;border-radius:20px;font-size:12px;}
 
 .topBtns{margin-top:80px;display:flex;justify-content:space-around;}
-.topBtn{width:22%;padding:10px;border-radius:20px;color:#fff;text-align:center;cursor:pointer;font-size:12px;}
+.topBtn{width:18%;padding:10px;border-radius:20px;color:#fff;text-align:center;cursor:pointer;font-size:12px;}
 .btn1{background:#6c5ce7;}
 .btn2{background:#00b894;}
 .btn3{background:#0984e3;}
 .btn4{background:#e17055;}
+.btn5{background:#111;}
 
 .game{display:none;}
 .active{display:block;}
@@ -48,13 +49,13 @@ input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;
 <div id="wallet">₹ 0</div>
 </div>
 
-<!-- 🔥 BUTTONS -->
+<!-- 🔥 5 BUTTON -->
 <div class="topBtns">
 <div class="topBtn btn1" onclick="showGame('jodi')">JODI</div>
 <div class="topBtn btn2" onclick="showGame('haruf')">HARUF</div>
 <div class="topBtn btn3" onclick="showGame('crossing')">CROSSING</div>
 <div class="topBtn btn4" onclick="showGame('copy')">COPY</div>
-<div class="topBtn btn4" onclick="showGame('play')">TYPING/IMAGE</div>
+<div class="topBtn btn5" onclick="showGame('play')">TYPING/IMAGE</div>
 </div>
 
 <!-- JODI -->
@@ -64,20 +65,53 @@ input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;
 
 <!-- HARUF -->
 <div id="haruf" class="game container">
-<div class="grid" id="harufGrid"></div>
+<h3>Single Andar</h3>
+<div class="grid" id="harufGrid1"></div>
+<h3>Single Bahar</h3>
+<div class="grid" id="harufGrid2"></div>
 </div>
 
-<!-- CROSSING -->
+<!-- CROSSING (UNCHANGED) -->
 <div id="crossing" class="game container">
-<div class="grid" id="crossGrid"></div>
+
+<label>1ST NUMBER</label>
+<input id="num1">
+
+<label>2ND NUMBER</label>
+<input id="num2">
+
+<label>POINTS</label>
+<input id="points">
+
+<button onclick="generateCross()">SET</button>
+
+<div id="crossGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;"></div>
+
 </div>
 
-<!-- COPY -->
+<!-- COPY (UNCHANGED) -->
 <div id="copy" class="game container">
-<div class="grid" id="copyGrid"></div>
+
+<label>ENTER DIGIT</label>
+<input id="digits">
+
+<label>ENTER AMOUNT</label>
+<input id="amt">
+
+<br><br>
+
+<label><input type="radio" name="p" value="with" checked> With Palti</label>
+<label><input type="radio" name="p" value="without"> Without Palti</label>
+
+<button onclick="generateCopy()">ADD</button>
+
+<table id="table" border="1" width="100%">
+<tr><th>NUMBER</th><th>AMOUNT</th><th>DEL</th></tr>
+</table>
+
 </div>
 
-<!-- 🔥 PLAY SYSTEM ADD -->
+<!-- 🔥 PLAY SYSTEM (AS IT IS) -->
 <div id="play" class="game container">
 
 <div style="display:flex;gap:10px;margin-bottom:10px;">
@@ -122,6 +156,7 @@ document.querySelectorAll(".game").forEach(g=>g.classList.remove("active"));
 document.getElementById(id).classList.add("active");
 }
 
+// wallet
 async function loadWallet(){
 let {data}=await client.from("login").select("balance").eq("id",user.id).single();
 wallet.innerText="₹ "+data.balance;
@@ -137,14 +172,8 @@ jodiGrid.innerHTML+=`<div class="box">${num}<input oninput="add('${num}',this.va
 
 // HARUF
 for(let i=0;i<10;i++){
-harufGrid.innerHTML+=`<div class="box">${i}<input oninput="add('${i}',this.value)"></div>`;
-}
-
-// CROSSING + COPY
-for(let i=0;i<100;i++){
-let num=i.toString().padStart(2,'0');
-crossGrid.innerHTML+=`<div class="box">${num}<input oninput="add('${num}',this.value)"></div>`;
-copyGrid.innerHTML+=`<div class="box">${num}<input oninput="add('${num}',this.value)"></div>`;
+harufGrid1.innerHTML+=`<div class="box">${i}<input oninput="add('${i}',this.value)"></div>`;
+harufGrid2.innerHTML+=`<div class="box">${i}<input oninput="add('${i}',this.value)"></div>`;
 }
 
 function add(num,val){
@@ -156,11 +185,79 @@ total+=val;
 totalBox();
 }
 
+// CROSSING (UNCHANGED)
+function generateCross(){
+let n1=num1.value,n2=num2.value,a=Number(points.value);
+crossGrid.innerHTML="";
+for(let i of n1){
+for(let j of n2){
+let pair=i+j;
+dataArr.push({number:pair,amount:a});
+total+=a;
+crossGrid.innerHTML+=`<div class="box">${pair}<br>₹${a}</div>`;
+}
+}
+totalBox();
+}
+
+// COPY (UNCHANGED)
+let currentMode = "";
+
+function generateCopy(){
+let d = digits.value;
+let a = Number(amt.value);
+let type = document.querySelector('input[name="p"]:checked').value;
+
+if(!d || !a) return alert("Fill data");
+
+if(currentMode !== "" && currentMode !== type){
+table.innerHTML = `<tr><th>NUMBER</th><th>AMOUNT</th><th>DEL</th></tr>`;
+dataArr = [];
+total = 0;
+}
+
+currentMode = type;
+
+let arr = d.match(/.{1,2}/g);
+
+arr.forEach(num=>{
+if(num.length==1) num="0"+num;
+
+if(!exists(num)){
+addRow(num,a);
+}
+
+if(type=="with"){
+let rev = num.split("").reverse().join("");
+if(rev!=num && !exists(rev)){
+addRow(rev,a);
+}
+}
+});
+
+totalBox();
+}
+
+function exists(num){
+return dataArr.some(item => item.number === num);
+}
+
+function addRow(num,a){
+dataArr.push({number:num,amount:a});
+total+=a;
+
+table.innerHTML+=`<tr>
+<td>${num}</td>
+<td>${a}</td>
+<td><button onclick="this.parentElement.parentElement.remove()">X</button></td>
+</tr>`;
+}
+
 function totalBox(){
 document.getElementById("total").innerText="₹ "+total;
 }
 
-// GAME SUBMIT
+// SUBMIT GAME
 async function submitAll(){
 if(total<=0){alert("No data");return;}
 
@@ -196,7 +293,7 @@ imageBox.style.display="block";
 }
 }
 
-// TYPING
+// TYPING FIXED
 async function submitTyping(){
 
 let text=typingData.value;
@@ -228,7 +325,7 @@ alert("Done");
 location.reload();
 }
 
-// IMAGE
+// IMAGE FIXED
 async function submitImage(){
 
 let file=imageInput.files[0];
