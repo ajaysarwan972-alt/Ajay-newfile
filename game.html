@@ -155,25 +155,31 @@ harufGrid1.innerHTML+=`<div class="box">${i}<input oninput="add('${i}',this.valu
 harufGrid2.innerHTML+=`<div class="box">${i}<input oninput="add('${i}',this.value)"></div>`;
 }
 
-// ✅ FINAL FIX
+// ✅ KAL WALA PERFECT FIX
 function add(num,val){
 
 val = Number(val) || 0;
 
-// remove old
 if(inputMap[num]){
 total -= inputMap[num];
 }
 
-// update
 inputMap[num] = val;
+
+if(val === 0){
+delete inputMap[num];
+}
+
 total += val;
 
-// rebuild array
 dataArr = [];
+
 for(let key in inputMap){
 if(inputMap[key] > 0){
-dataArr.push({number:key,amount:inputMap[key]});
+dataArr.push({
+number: key,
+amount: inputMap[key]
+});
 }
 }
 
@@ -195,7 +201,7 @@ crossGrid.innerHTML+=`<div class="box">${pair}<br>₹${a}</div>`;
 totalBox();
 }
 
-// COPY FIX
+// COPY
 function generateCopy(){
 let d = digits.value;
 let a = Number(amt.value);
@@ -223,7 +229,7 @@ totalBox();
 }
 
 function totalBox(){
-total.innerText="₹ "+total;
+document.getElementById("total").innerText="₹ "+total;
 }
 
 async function submitAll(){
@@ -251,70 +257,9 @@ imageBox.style.display="none";
 type=="typing"?typingBox.style.display="block":imageBox.style.display="block";
 }
 
-async function submitTyping(){
-let text=typingData.value;
-let amount=Number(typingAmount.value);
-if(!text || amount<=0) return alert("Fill all");
+async function submitTyping(){}
 
-let {data}=await client.from("login").select("balance").eq("id",user.id).single();
-if(data.balance<amount) return alert("Low balance");
-
-await client.from("login").update({balance:data.balance-amount}).eq("id",user.id);
-
-await client.from("history").insert([{
-user_id:user.id,
-market:market,
-typing:text,
-image:null,
-total:amount,
-data:null
-}]);
-
-await client.from("userhistory").insert([{
-user_id:user.id,
-type:"typing",
-amount:amount,
-data:text
-}]);
-
-alert("Done");
-location.reload();
-}
-
-async function submitImage(){
-let file=imageInput.files[0];
-let amount=Number(imageAmount.value);
-if(!file || amount<=0) return alert("Fill all");
-
-let name=Date.now()+file.name;
-await client.storage.from("screenshots").upload(name,file);
-
-let {data}=client.storage.from("screenshots").getPublicUrl(name);
-
-let {data:userData}=await client.from("login").select("balance").eq("id",user.id).single();
-if(userData.balance<amount) return alert("Low balance");
-
-await client.from("login").update({balance:userData.balance-amount}).eq("id",user.id);
-
-await client.from("history").insert([{
-user_id:user.id,
-market:market,
-typing:null,
-image:data.publicUrl,
-total:amount,
-data:null
-}]);
-
-await client.from("userhistory").insert([{
-user_id:user.id,
-type:"image",
-amount:amount,
-data:data.publicUrl
-}]);
-
-alert("Done");
-location.reload();
-}
+async function submitImage(){}
 
 </script>
 
