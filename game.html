@@ -75,6 +75,8 @@ input{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;}
 <input id="amt">
 <br><br>
 <button onclick="generateCopy()">ADD</button>
+
+<div id="copyGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;"></div>
 </div>
 
 <div class="bottom">
@@ -138,7 +140,7 @@ harufGrid1.innerHTML+=`<div class="box">${i}<input oninput="handleInput('${i}',t
 harufGrid2.innerHTML+=`<div class="box">${i}<input oninput="handleInput('${i}',this)"></div>`;
 }
 
-// ✅ CROSSING FIXED
+// ✅ CROSSING FIX
 function generateCross(){
 let n1 = num1.value;
 let n2 = num2.value;
@@ -167,17 +169,30 @@ box.appendChild(div);
 updateTotal();
 }
 
-// COPY
+// ✅ COPY FIX
 function generateCopy(){
 let d = digits.value;
 let a = Number(amt.value);
+
 if(!d || !a) return alert("Fill data");
 
+let box = document.getElementById("copyGrid");
+box.innerHTML = "";
+
 let arr = d.match(/.{1,2}/g);
+
 arr.forEach(num=>{
 if(num.length==1) num="0"+num;
-dataMap[num]=a;
+
+dataMap[num] = a;
+
+let item = document.createElement("div");
+item.className = "box";
+item.innerHTML = `<b style="color:red">${num}</b><br>₹ ${a}`;
+
+box.appendChild(item);
 });
+
 updateTotal();
 }
 
