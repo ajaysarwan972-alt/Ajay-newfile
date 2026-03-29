@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{font-family:Arial;margin:0;background:#f1f5f9;}
+
+.header{
+display:flex;justify-content:space-between;
+padding:10px;background:#fff;
+}
+
+.card{
+background:#fff;
+margin:10px;
+padding:12px;
+border-radius:10px;
+}
+
+img{
+width:100%;
+height:auto; /* 👈 पूरी image दिखे */
+border-radius:10px;
+margin-top:10px;
+}
+
+.text{
+white-space:pre-wrap;
+background:#f1f5f9;
+padding:8px;
+border-radius:8px;
+margin-top:10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+<div id="userId">ID: 0</div>
+</div>
+
+<div id="historyBox"></div>
+
+<script>
+
+const client = supabase.createClient(
+"https://katbdbzoufiblnnsoxkk.supabase.co",
+"sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
+);
+
+const user = JSON.parse(localStorage.getItem("user"));
+
+// 🔥 LOAD HISTORY
+async function loadHistory(){
+
+let {data} = await client
+.from("typing_image")
+.select("*")
+.eq("user_id", user.id)   // 👈 सिर्फ उसी user की entry
+.order("id",{ascending:false});
+
+userId.innerText="ID: "+user.id;
+
+let html="";
+
+data.forEach(item=>{
+
+html+=`
+<div class="card">
+
+<div><b>${item.market}</b></div>
+
+${
+item.data && item.data.includes("http")
+? `<img src="${item.data}">`   // 👈 full image
+: `<div class="text">${item.data}</div>`
+}
+
+<div style="margin-top:10px;font-weight:bold;color:green;">
+Total: ₹ ${item.total}
+</div>
+
+</div>
+`;
+
+});
+
+document.getElementById("historyBox").innerHTML=html;
+}
+
+loadHistory();
+
+</script>
+
+</body>
+</html>
