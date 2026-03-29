@@ -72,38 +72,25 @@ input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;
 
 <!-- CROSSING -->
 <div id="crossing" class="game container">
-<label>1ST NUMBER</label>
 <input id="num1">
-<label>2ND NUMBER</label>
 <input id="num2">
-<label>POINTS</label>
 <input id="points">
 <button onclick="generateCross()">SET</button>
-<div id="crossGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;"></div>
+<div id="crossGrid"></div>
 </div>
 
 <!-- COPY -->
 <div id="copy" class="game container">
-<label>ENTER DIGIT</label>
 <input id="digits">
-<label>ENTER AMOUNT</label>
 <input id="amt">
-<br><br>
-<label><input type="radio" name="p" value="with" checked> With Palti</label>
-<label><input type="radio" name="p" value="without"> Without Palti</label>
 <button onclick="generateCopy()">ADD</button>
-<table id="table" border="1" width="100%">
-<tr><th>NUMBER</th><th>AMOUNT</th><th>DEL</th></tr>
-</table>
 </div>
 
 <!-- PLAY -->
 <div id="play" class="game container">
 
-<div style="display:flex;gap:10px;margin-bottom:10px;">
 <button onclick="showPlay('typing')">Typing</button>
 <button onclick="showPlay('image')">Image</button>
-</div>
 
 <div id="typingBox">
 <textarea id="typingData"></textarea>
@@ -142,13 +129,11 @@ document.querySelectorAll(".game").forEach(g=>g.classList.remove("active"));
 document.getElementById(id).classList.add("active");
 }
 
-// wallet
-async function loadWallet(){
-let {data}=await client.from("login").select("balance").eq("id",user.id).single();
-wallet.innerText="₹ "+data.balance;
-userId.innerText="ID: "+user.id;
+function showPlay(type){
+typingBox.style.display="none";
+imageBox.style.display="none";
+type=="typing"?typingBox.style.display="block":imageBox.style.display="block";
 }
-loadWallet();
 
 // JODI
 for(let i=0;i<100;i++){
@@ -168,7 +153,7 @@ if(val>0){
 dataArr.push({number:num,amount:val});
 total+=val;
 }
-totalBox();
+document.getElementById("total").innerText="₹ "+total;
 }
 
 // CROSSING
@@ -183,17 +168,13 @@ total+=a;
 crossGrid.innerHTML+=`<div class="box">${pair}<br>₹${a}</div>`;
 }
 }
-totalBox();
+document.getElementById("total").innerText="₹ "+total;
 }
 
 // COPY
-let currentMode = "";
-
 function generateCopy(){
 let d = digits.value;
 let a = Number(amt.value);
-let type = document.querySelector('input[name="p"]:checked').value;
-
 if(!d || !a) return alert("Fill data");
 
 let arr = d.match(/.{1,2}/g);
@@ -202,10 +183,7 @@ if(num.length==1) num="0"+num;
 dataArr.push({number:num,amount:a});
 total+=a;
 });
-totalBox();
-}
 
-function totalBox(){
 document.getElementById("total").innerText="₹ "+total;
 }
 
@@ -229,83 +207,83 @@ alert("Done");
 location.reload();
 }
 
-// SWITCH
-function showPlay(type){
-typingBox.style.display="none";
-imageBox.style.display="none";
-type=="typing"?typingBox.style.display="block":imageBox.style.display="block";
-}
-
-// TYPING FIX
+// ✅ TYPING FIX FINAL
 async function submitTyping(){
 
-let text=typingData.value;
-let amount=Number(typingAmount.value);
+let text = typingData.value.trim();
+let amount = Number(typingAmount.value);
 
-if(!text || amount<=0) return alert("Fill all");
+if(!text || amount<=0){
+alert("Fill all");
+return;
+}
 
-let {data}=await client.from("login").select("balance").eq("id",user.id).single();
-if(data.balance<amount) return alert("Low balance");
+let {data:userData} = await client.from("login").select("balance").eq("id",user.id).single();
+if(userData.balance < amount){
+alert("Low balance");
+return;
+}
 
-await client.from("login").update({balance:data.balance-amount}).eq("id",user.id);
+await client.from("login").update({balance:userData.balance-amount}).eq("id",user.id);
 
-// history
+let saveData = [{
+number:"TYPING",
+amount:amount,
+value:text
+}];
+
 await client.from("history").insert([{
 user_id:user.id,
 market:market,
-typing:text,
-image:null,
-total:amount,
-data:null
-}]);
-
-// userhistory
-await client.from("userhistory").insert([{
-user_id:user.id,
-type:"typing",
-amount:amount,
-data:text
+data:JSON.stringify(saveData),
+total:amount
 }]);
 
 alert("Done");
 location.reload();
 }
 
-// IMAGE FIX
+// ✅ IMAGE FIX FINAL
 async function submitImage(){
 
-let file=imageInput.files[0];
-let amount=Number(imageAmount.value);
+let file = imageInput.files[0];
+let amount = Number(imageAmount.value);
 
-if(!file || amount<=0) return alert("Fill all");
+if(!file || amount<=0){
+alert("Fill all");
+return;
+}
 
-let name=Date.now()+file.name;
+let name = Date.now()+file.name;
 
-await client.storage.from("screenshots").upload(name,file);
+let {error} = await client.storage.from("screenshots").upload(name,file);
+if(error){
+alert(error.message);
+return;
+}
 
-let {data}=client.storage.from("screenshots").getPublicUrl(name);
+let {data:urlData} = client.storage.from("screenshots").getPublicUrl(name);
+let imageUrl = urlData.publicUrl;
 
-let {data:userData}=await client.from("login").select("balance").eq("id",user.id).single();
-if(userData.balance<amount) return alert("Low balance");
+let {data:userData} = await client.from("login").select("balance").eq("id",user.id).single();
+if(userData.balance < amount){
+alert("Low balance");
+return;
+}
 
 await client.from("login").update({balance:userData.balance-amount}).eq("id",user.id);
 
-// history
+let saveData = [{
+number:"IMAGE",
+amount:amount,
+value:imageUrl
+}];
+
 await client.from("history").insert([{
 user_id:user.id,
 market:market,
-typing:null,
-image:data.publicUrl,
-total:amount,
-data:null
-}]);
-
-// userhistory
-await client.from("userhistory").insert([{
-user_id:user.id,
-type:"image",
-amount:amount,
-data:data.publicUrl
+data:JSON.stringify(saveData),
+total:amount
 }]);
 
 alert("Done");
