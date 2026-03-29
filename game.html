@@ -64,6 +64,7 @@ input{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;}
 <label>POINTS</label>
 <input id="points">
 <button onclick="generateCross()">SET</button>
+
 <div id="crossGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;"></div>
 </div>
 
@@ -105,7 +106,6 @@ userId.innerText="ID: "+user.id;
 }
 loadWallet();
 
-// 🔥 INPUT HANDLER (MAIN FIX)
 function handleInput(num, el){
 let val = parseInt(el.value) || 0;
 
@@ -118,7 +118,6 @@ delete dataMap[num];
 updateTotal();
 }
 
-// 🔥 TOTAL FIX
 function updateTotal(){
 let total = 0;
 for(let key in dataMap){
@@ -139,15 +138,32 @@ harufGrid1.innerHTML+=`<div class="box">${i}<input oninput="handleInput('${i}',t
 harufGrid2.innerHTML+=`<div class="box">${i}<input oninput="handleInput('${i}',this)"></div>`;
 }
 
-// CROSSING
+// ✅ CROSSING FIXED
 function generateCross(){
-let n1=num1.value,n2=num2.value,a=Number(points.value);
+let n1 = num1.value;
+let n2 = num2.value;
+let a = Number(points.value);
+
+if(!n1 || !n2 || !a) return;
+
+let box = document.getElementById("crossGrid");
+box.innerHTML = "";
+
 for(let i of n1){
 for(let j of n2){
-let pair=i+j;
-dataMap[pair]=a;
+
+let pair = i + j;
+dataMap[pair] = a;
+
+let div = document.createElement("div");
+div.className = "box";
+div.innerHTML = `<b style="color:red">${pair}</b><br>₹ ${a}`;
+
+box.appendChild(div);
+
 }
 }
+
 updateTotal();
 }
 
