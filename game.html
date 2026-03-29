@@ -110,21 +110,14 @@ loadWallet();
 
 function handleInput(num, el){
 let val = parseInt(el.value) || 0;
-
-if(val > 0){
-dataMap[num] = val;
-}else{
-delete dataMap[num];
-}
-
+if(val > 0){ dataMap[num] = val; }
+else{ delete dataMap[num]; }
 updateTotal();
 }
 
 function updateTotal(){
 let total = 0;
-for(let key in dataMap){
-total += dataMap[key];
-}
+for(let key in dataMap){ total += dataMap[key]; }
 document.getElementById("total").innerText = "₹ " + total;
 }
 
@@ -140,13 +133,16 @@ harufGrid1.innerHTML+=`<div class="box">${i}<input oninput="handleInput('${i}',t
 harufGrid2.innerHTML+=`<div class="box">${i}<input oninput="handleInput('${i}',this)"></div>`;
 }
 
-// ✅ CROSSING FIX
+// ✅ CROSSING FINAL FIX
 function generateCross(){
-let n1 = num1.value;
-let n2 = num2.value;
+let n1 = num1.value.trim();
+let n2 = num2.value.trim();
 let a = Number(points.value);
 
-if(!n1 || !n2 || !a) return;
+if(!n1 || !n2 || !a){
+alert("Sab fill kar");
+return;
+}
 
 let box = document.getElementById("crossGrid");
 box.innerHTML = "";
@@ -154,13 +150,14 @@ box.innerHTML = "";
 for(let i of n1){
 for(let j of n2){
 
+if(isNaN(i) || isNaN(j)) continue;
+
 let pair = i + j;
 dataMap[pair] = a;
 
 let div = document.createElement("div");
 div.className = "box";
 div.innerHTML = `<b style="color:red">${pair}</b><br>₹ ${a}`;
-
 box.appendChild(div);
 
 }
@@ -169,12 +166,15 @@ box.appendChild(div);
 updateTotal();
 }
 
-// ✅ COPY FIX
+// ✅ COPY FINAL FIX
 function generateCopy(){
-let d = digits.value;
+let d = digits.value.replace(/\s+/g,'');
 let a = Number(amt.value);
 
-if(!d || !a) return alert("Fill data");
+if(!d || !a){
+alert("Fill data");
+return;
+}
 
 let box = document.getElementById("copyGrid");
 box.innerHTML = "";
@@ -189,7 +189,6 @@ dataMap[num] = a;
 let item = document.createElement("div");
 item.className = "box";
 item.innerHTML = `<b style="color:red">${num}</b><br>₹ ${a}`;
-
 box.appendChild(item);
 });
 
