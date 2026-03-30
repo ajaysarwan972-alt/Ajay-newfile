@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rate System</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{margin:0;background:#06121f;font-family:Arial;color:#0ff;}
+.title{background:#00ff88;color:#000;text-align:center;padding:12px;font-weight:bold;}
+.grid{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;padding:10px;}
+.box{border:1px solid #0ff;border-radius:10px;padding:6px;text-align:center;}
+.num{font-size:12px;}
+.amt{font-size:12px;color:#fff;}
+.top{padding:10px;text-align:center;}
+input{padding:8px;border-radius:10px;border:none;width:120px;margin:5px;}
+button{padding:8px 15px;border:none;border-radius:10px;background:#00ff88;}
+.bottom{position:fixed;bottom:0;width:100%;display:flex;}
+.total{width:50%;background:red;color:#fff;text-align:center;padding:12px;}
+.submit{width:50%;background:green;color:#fff;text-align:center;padding:12px;}
+</style>
+</head>
+
+<body>
+
+<div class="title">Rate System</div>
+
+<div class="top">
+<input id="invest" placeholder="Enter Amount ₹">
+<button onclick="applyCut()">SET</button>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div class="bottom">
+<div class="total" id="total">₹ 0</div>
+<div class="submit" onclick="submitRate()">SUBMIT</div>
+</div>
+
+<script>
+
+const client = supabase.createClient(
+"https://katbdbzoufiblnnsoxkk.supabase.co",
+"sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
+);
+
+const user = JSON.parse(localStorage.getItem("user"));
+const market = localStorage.getItem("market") || "UNKNOWN";
+
+// 🔥 GAME DATA
+let dataArr = JSON.parse(localStorage.getItem("gameData")) || [];
+
+let liveData = {};
+let total = 0;
+
+// LOAD DATA
+function loadData(){
+liveData = {};
+
+dataArr.forEach(i=>{
+liveData[i.number] = (liveData[i.number] || 0) + Number(i.amount);
+});
+
+render();
+}
+
+// RENDER UI
+function render(){
+grid.innerHTML="";
+total = 0;
+
+for(let i=0;i<100;i++){
+let n=i.toString().padStart(2,'0');
+let val = liveData[n] || 0;
+
+total += Number(val);
+
+grid.innerHTML+=`
+<div class="box">
+<div class="num">${n}</div>
+<div class="amt">${val}</div>
+</div>
+`;
+}
+
+document.getElementById("total").innerText = "₹ " + total.toFixed(2);
+}
+
+// 🔥 CUT SYSTEM
+function applyCut(){
+
+let invest = Number(document.getElementById("invest").value);
+if(!invest) return alert("Enter amount");
+
+// base cut
+let baseCut = invest / 100;
+
+// max value
+let max = Math.max(...Object.values(liveData));
+
+for(let key in liveData){
+
+let val = liveData[key];
+if(val==0) continue;
+
+let cut = (val / max) * baseCut;
+
+liveData[key] = +(val - cut).toFixed(2);
+}
+
+render();
+}
+
+// 🔥 SUBMIT (wallet cut + save)
+async function submitRate(){
+
+let invest = Number(document.getElementById("invest").value);
+if(!invest) return alert("Enter amount");
+
+// wallet check
+let {data} = await client
+.from("login")
+.select("balance")
+.eq("id", user.id)
+.single();
+
+if(data.balance < invest){
+alert("Low balance");
+return;
+}
+
+// wallet update
+await client
+.from("login")
+.update({balance: data.balance - invest})
+.eq("id", user.id);
+
+// save history
+await client.from("history").insert([{
+user_id: user.id,
+market: market,
+data: JSON.stringify(liveData),
+total: invest,
+type: "rate-system"
+}]);
+
+alert("Done");
+location.reload();
+}
+
+loadData();
+
+</script>
+
+</body>
+</html>
