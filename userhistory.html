@@ -91,51 +91,104 @@ async function loadHistory(){
 
     data.forEach(item=>{
 
-        let numbers = [];
-
-        try{
-            let parsed = JSON.parse(item.data || "[]");
-
-            // ✅ अगर array है
-            if(Array.isArray(parsed)){
-                numbers = parsed;
-            }
-            // ✅ अगर object है (old data)
-            else if(typeof parsed === "object"){
-                numbers = Object.entries(parsed).map(([k,v])=>({
-                    number: k,
-                    amount: typeof v === "object" ? v.amount || v.value : v
-                }));
-            }
-
-        }catch(e){
-            console.log("Bad Data Skip:", item.data);
-            return; // ❌ खराब row skip
-        }
-
         let date = new Date(item.created_at).toLocaleString();
 
-        numbers.forEach(n => {
-
-            let num = n.number ?? "00";
-            let amount = n.amount ?? 0;
-
-            let formattedNum = String(num).padStart(2,'0');
-
+        // =========================
+        // ✅ TYPING
+        if(item.typing){
             html += `
             <div class="card">
                 <div class="row">
                     <div class="market">${item.market}</div>
                     <div class="date">${date}</div>
                 </div>
-
-                <div class="row bet">
-                    <div>Bet No: ${formattedNum}</div>
-                    <div class="amount">₹ ${amount}</div>
-                </div>
+                <div class="bet">Typing: ${item.typing}</div>
+                <div class="amount">₹ ${item.total}</div>
             </div>
             `;
-        });
+        }
+
+        // =========================
+        // ✅ IMAGE
+        if(item.image){
+            html += `
+            <div class="card">
+                <div class="row">
+                    <div class="market">${item.market}</div>
+                    <div class="date">${date}</div>
+                </div>
+                <div class="bet">
+                    <img src="${item.image}" width="100%">
+                </div>
+                <div class="amount">₹ ${item.total}</div>
+            </div>
+            `;
+        }
+
+        // =========================
+        // ✅ NORMAL DATA
+        if(item.data){
+
+            let arr;
+
+            try{
+                arr = JSON.parse(item.data);
+            }catch{
+                return;
+            }
+
+            if(!Array.isArray(arr)) return;
+
+            arr.forEach(n => {
+
+                let num = "";
+                let amount = 0;
+
+                // ANDAR
+                if(n.type === "A" && n.number != null){
+                    num = n.number + "×";
+                    amount = n.amount || 0;
+                }
+
+                // BAHAR
+                else if(n.type === "B" && n.number != null){
+                    num = "×" + n.number;
+                    amount = n.amount || 0;
+                }
+
+                // NORMAL
+                else if(n.number && n.amount){
+                    num = String(n.number).padStart(2,'0');
+                    amount = n.amount;
+                }
+
+                // COPY
+                else if(n.num && n.a){
+                    num = String(n.num).padStart(2,'0');
+                    amount = n.a;
+                }
+
+                // OTHER (force show)
+                else{
+                    num = JSON.stringify(n);
+                    amount = "";
+                }
+
+                html += `
+                <div class="card">
+                    <div class="row">
+                        <div class="market">${item.market}</div>
+                        <div class="date">${date}</div>
+                    </div>
+
+                    <div class="row bet">
+                        <div>Bet No: ${num}</div>
+                        <div class="amount">₹ ${amount}</div>
+                    </div>
+                </div>
+                `;
+            });
+        }
 
     });
 
