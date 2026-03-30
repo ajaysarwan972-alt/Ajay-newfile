@@ -149,13 +149,13 @@ let num=i.toString().padStart(2,'0');
 jodiGrid.innerHTML+=`<div class="box">${num}<input oninput="add('${num}',this.value)"></div>`;
 }
 
-// HARUF
+// ✅ HARUF FIX (FINAL)
 for(let i=0;i<10;i++){
-harufGrid1.innerHTML+=`<div class="box">${i}<input oninput="add('${i}',this.value)"></div>`;
-harufGrid2.innerHTML+=`<div class="box">${i}<input oninput="add('${i}',this.value)"></div>`;
+harufGrid1.innerHTML+=`<div class="box">${i}<input oninput="add('A${i}',this.value)"></div>`;
+harufGrid2.innerHTML+=`<div class="box">${i}<input oninput="add('B${i}',this.value)"></div>`;
 }
 
-// ✅ KAL WALA PERFECT FIX
+// SAME ADD FUNCTION
 function add(num,val){
 
 val = Number(val) || 0;
@@ -186,7 +186,8 @@ amount: inputMap[key]
 totalBox();
 }
 
-// CROSSING
+// बाकी सब same
+
 function generateCross(){
 let n1=num1.value,n2=num2.value,a=Number(points.value);
 crossGrid.innerHTML="";
@@ -201,7 +202,6 @@ crossGrid.innerHTML+=`<div class="box">${pair}<br>₹${a}</div>`;
 totalBox();
 }
 
-// COPY
 function generateCopy(){
 let d = digits.value;
 let a = Number(amt.value);
@@ -258,7 +258,6 @@ type=="typing"?typingBox.style.display="block":imageBox.style.display="block";
 }
 
 async function submitTyping(){}
-
 async function submitImage(){}
 
 </script>
