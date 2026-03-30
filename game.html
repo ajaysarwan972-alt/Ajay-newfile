@@ -8,34 +8,17 @@
 
 <style>
 body{font-family:Arial;margin:0;background:#e5e7eb;}
-
-.header{
-position:fixed;top:10px;left:10px;right:10px;
-background:#fff;padding:10px;border-radius:20px;
-display:flex;justify-content:space-between;
-z-index:999;
-}
-
+.header{position:fixed;top:10px;left:10px;right:10px;background:#fff;padding:10px;border-radius:20px;display:flex;justify-content:space-between;z-index:999;}
 #userId{background:green;color:#fff;padding:6px 12px;border-radius:20px;font-size:12px;}
 #wallet{background:red;color:#fff;padding:6px 12px;border-radius:20px;font-size:12px;}
-
 .topBtns{margin-top:80px;display:flex;justify-content:space-around;}
 .topBtn{width:18%;padding:10px;border-radius:20px;color:#fff;text-align:center;cursor:pointer;font-size:12px;}
-.btn1{background:#6c5ce7;}
-.btn2{background:#00b894;}
-.btn3{background:#0984e3;}
-.btn4{background:#e17055;}
-.btn5{background:#111;}
-
-.game{display:none;}
-.active{display:block;}
-
+.btn1{background:#6c5ce7;} .btn2{background:#00b894;} .btn3{background:#0984e3;} .btn4{background:#e17055;} .btn5{background:#111;}
+.game{display:none;} .active{display:block;}
 .container{margin:10px;background:#fff;padding:15px;border-radius:15px;padding-bottom:120px;}
-
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
 .box{background:#fff;padding:10px;border-radius:10px;text-align:center;border:1px solid #ddd;}
 input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;}
-
 .bottom{position:fixed;bottom:0;width:100%;display:flex;}
 .total{width:50%;background:linear-gradient(to right,blue,red);color:#fff;text-align:center;padding:15px;}
 .submit{width:50%;background:green;color:#fff;text-align:center;padding:15px;}
@@ -93,8 +76,6 @@ input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;
 </table>
 </div>
 
-<div id="play" class="game container"></div>
-
 <div class="bottom">
 <div class="total" id="total">₹ 0</div>
 <div class="submit" onclick="submitAll()">SUBMIT</div>
@@ -119,19 +100,19 @@ document.querySelectorAll(".game").forEach(g=>g.classList.remove("active"));
 document.getElementById(id).classList.add("active");
 }
 
-// JODI
+// JODI (input free)
 for(let i=0;i<100;i++){
 let num=i.toString().padStart(2,'0');
 jodiGrid.innerHTML+=`<div class="box">${num}<input oninput="add('${num}',this.value)"></div>`;
 }
 
-// HARUF
+// HARUF (input free)
 for(let i=0;i<10;i++){
 harufGrid1.innerHTML+=`<div class="box">${i}<input oninput="add('A${i}',this.value)"></div>`;
 harufGrid2.innerHTML+=`<div class="box">${i}<input oninput="add('B${i}',this.value)"></div>`;
 }
 
-// ADD
+// INPUT ADD (ALLOW UPDATE)
 function add(num,val){
 val = Number(val) || 0;
 
@@ -148,7 +129,6 @@ delete inputMap[num];
 total += val;
 
 dataArr = [];
-
 for(let key in inputMap){
 if(inputMap[key] > 0){
 dataArr.push({number:key,amount:inputMap[key]});
@@ -158,22 +138,30 @@ dataArr.push({number:key,amount:inputMap[key]});
 totalBox();
 }
 
-// CROSSING
+// CROSSING (duplicate block)
 function generateCross(){
 let n1=num1.value,n2=num2.value,a=Number(points.value);
 crossGrid.innerHTML="";
+
+let existing = new Set(dataArr.map(i => i.number));
+
 for(let i of n1){
 for(let j of n2){
 let pair=i+j;
+
+if(existing.has(pair)) continue;
+
 dataArr.push({number:pair,amount:a});
 total+=a;
+existing.add(pair);
+
 crossGrid.innerHTML+=`<div class="box">${pair}<br>₹${a}</div>`;
 }
 }
 totalBox();
 }
 
-// ✅ COPY FIXED
+// COPY (duplicate only per click block)
 function generateCopy(){
 
 let d = digits.value;
@@ -183,42 +171,35 @@ let palti = document.querySelector('input[name="p"]:checked').value;
 if(!d || !a) return alert("Fill data");
 
 let arr = d.match(/.{1,2}/g);
-
-let existing = new Set(dataArr.map(i => i.number));
+let currentSet = new Set();
 
 arr.forEach(num=>{
 
 if(num.length==1) num="0"+num;
 
-if(existing.has(num)) return;
+// same click duplicate block
+if(currentSet.has(num)) return;
+
+currentSet.add(num);
 
 dataArr.push({number:num,amount:a});
 total+=a;
-existing.add(num);
 
 let row = document.createElement("tr");
-row.innerHTML = `
-<td>${num}</td>
-<td>${a}</td>
-<td><button onclick="removeRow('${num}', this)">Delete</button></td>
-`;
+row.innerHTML = `<td>${num}</td><td>${a}</td><td><button onclick="removeRow('${num}', this)">Delete</button></td>`;
 table.appendChild(row);
 
-// PALTI
+// palti
 if(palti==="with"){
 let rev = num.split("").reverse().join("");
+if(rev!==num && !currentSet.has(rev)){
+currentSet.add(rev);
 
-if(rev!==num && !existing.has(rev)){
 dataArr.push({number:rev,amount:a});
 total+=a;
-existing.add(rev);
 
 let row2 = document.createElement("tr");
-row2.innerHTML = `
-<td>${rev}</td>
-<td>${a}</td>
-<td><button onclick="removeRow('${rev}', this)">Delete</button></td>
-`;
+row2.innerHTML = `<td>${rev}</td><td>${a}</td><td><button onclick="removeRow('${rev}', this)">Delete</button></td>`;
 table.appendChild(row2);
 }
 }
@@ -228,7 +209,6 @@ table.appendChild(row2);
 totalBox();
 }
 
-// DELETE FIX
 function removeRow(num, btn){
 dataArr = dataArr.filter(i=>i.number!==num);
 total=0;
