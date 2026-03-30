@@ -131,7 +131,7 @@ harufGrid1.innerHTML+=`<div class="box">${i}<input oninput="add('A${i}',this.val
 harufGrid2.innerHTML+=`<div class="box">${i}<input oninput="add('B${i}',this.value)"></div>`;
 }
 
-// ADD (same)
+// INPUT SYSTEM SAME
 function add(num,val){
 val = Number(val) || 0;
 
@@ -165,9 +165,10 @@ let n1 = num1.value;
 let n2 = num2.value;
 let a = Number(points.value);
 
-crossGrid.innerHTML = "";
-
-let existing = new Set(dataArr.map(i => i.number));
+let existing = new Set(
+[...crossGrid.querySelectorAll(".box")]
+.map(b => b.innerText.split("\n")[0])
+);
 
 for(let i of n1){
 for(let j of n2){
@@ -202,7 +203,10 @@ if(!d || !a) return alert("Fill data");
 
 let arr = d.match(/.{1,2}/g);
 
-let existing = new Set(dataArr.map(i => i.number));
+let existing = new Set(
+[...document.querySelectorAll("#table tr td:first-child")]
+.map(td => td.innerText)
+);
 
 arr.forEach(num=>{
 
