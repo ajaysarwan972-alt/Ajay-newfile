@@ -8,17 +8,9 @@
 
 <style>
 body{font-family:Arial;margin:0;background:#e5e7eb;}
-
-.header{
-position:fixed;top:10px;left:10px;right:10px;
-background:#fff;padding:10px;border-radius:20px;
-display:flex;justify-content:space-between;
-z-index:999;
-}
-
+.header{position:fixed;top:10px;left:10px;right:10px;background:#fff;padding:10px;border-radius:20px;display:flex;justify-content:space-between;z-index:999;}
 #userId{background:green;color:#fff;padding:6px 12px;border-radius:20px;font-size:12px;}
 #wallet{background:red;color:#fff;padding:6px 12px;border-radius:20px;font-size:12px;}
-
 .topBtns{margin-top:80px;display:flex;justify-content:space-around;}
 .topBtn{width:18%;padding:10px;border-radius:20px;color:#fff;text-align:center;cursor:pointer;font-size:12px;}
 .btn1{background:#6c5ce7;}
@@ -26,16 +18,12 @@ z-index:999;
 .btn3{background:#0984e3;}
 .btn4{background:#e17055;}
 .btn5{background:#111;}
-
 .game{display:none;}
 .active{display:block;}
-
 .container{margin:10px;background:#fff;padding:15px;border-radius:15px;padding-bottom:120px;}
-
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
 .box{background:#fff;padding:10px;border-radius:10px;text-align:center;border:1px solid #ddd;}
-input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;}
-
+input{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;}
 .bottom{position:fixed;bottom:0;width:100%;display:flex;}
 .total{width:50%;background:linear-gradient(to right,blue,red);color:#fff;text-align:center;padding:15px;}
 .submit{width:50%;background:green;color:#fff;text-align:center;padding:15px;}
@@ -54,7 +42,7 @@ input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;
 <div class="topBtn btn2" onclick="showGame('haruf')">HARUF</div>
 <div class="topBtn btn3" onclick="showGame('crossing')">CROSSING</div>
 <div class="topBtn btn4" onclick="showGame('copy')">COPY</div>
-<div class="topBtn btn5" onclick="showGame('play')">TYPING/IMAGE</div>
+<div class="topBtn btn5" onclick="showGame('play')">TYPING</div>
 </div>
 
 <div id="jodi" class="game active container">
@@ -69,31 +57,21 @@ input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;
 </div>
 
 <div id="crossing" class="game container">
-<label>1ST NUMBER</label>
-<input id="num1">
-<label>2ND NUMBER</label>
-<input id="num2">
-<label>POINTS</label>
-<input id="points">
+<input id="num1" placeholder="1st Number">
+<input id="num2" placeholder="2nd Number">
+<input id="points" placeholder="Amount">
 <button onclick="generateCross()">SET</button>
 <div id="crossGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;"></div>
 </div>
 
 <div id="copy" class="game container">
-<label>ENTER DIGIT</label>
-<input id="digits">
-<label>ENTER AMOUNT</label>
-<input id="amt">
-<br><br>
-<label><input type="radio" name="p" value="with" checked> With Palti</label>
-<label><input type="radio" name="p" value="without"> Without Palti</label>
+<input id="digits" placeholder="Digits">
+<input id="amt" placeholder="Amount">
 <button onclick="generateCopy()">ADD</button>
 <table id="table" border="1" width="100%">
 <tr><th>NUMBER</th><th>AMOUNT</th><th>DEL</th></tr>
 </table>
 </div>
-
-<div id="play" class="game container"></div>
 
 <div class="bottom">
 <div class="total" id="total">₹ 0</div>
@@ -107,13 +85,32 @@ const client = supabase.createClient(
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
+// ✅ USER LOAD
 const user = JSON.parse(localStorage.getItem("user"));
-const market = localStorage.getItem("market") || "UNKNOWN";
 
-let total=0;
-let dataArr=[];
-let inputMap = {};
+// ✅ LOAD WALLET + ID
+loadUser();
 
+async function loadUser(){
+if(!user){
+alert("Login again");
+return;
+}
+
+document.getElementById("userId").innerText = "ID: " + user.id;
+
+let {data,error} = await client
+.from("login")
+.select("balance")
+.eq("id", user.id)
+.single();
+
+if(data){
+document.getElementById("wallet").innerText = "₹ " + data.balance;
+}
+}
+
+// GAME SWITCH
 function showGame(id){
 document.querySelectorAll(".game").forEach(g=>g.classList.remove("active"));
 document.getElementById(id).classList.add("active");
@@ -131,24 +128,22 @@ harufGrid1.innerHTML+=`<div class="box">${i}<input oninput="add('A${i}',this.val
 harufGrid2.innerHTML+=`<div class="box">${i}<input oninput="add('B${i}',this.value)"></div>`;
 }
 
-// INPUT SYSTEM SAME
+let total=0;
+let dataArr=[];
+let inputMap = {};
+
+// ADD
 function add(num,val){
 val = Number(val) || 0;
 
-if(inputMap[num]){
-total -= inputMap[num];
-}
+if(inputMap[num]) total -= inputMap[num];
 
 inputMap[num] = val;
-
-if(val === 0){
-delete inputMap[num];
-}
+if(val === 0) delete inputMap[num];
 
 total += val;
 
 dataArr = [];
-
 for(let key in inputMap){
 if(inputMap[key] > 0){
 dataArr.push({number:key,amount:inputMap[key]});
@@ -158,124 +153,30 @@ dataArr.push({number:key,amount:inputMap[key]});
 totalBox();
 }
 
-// ✅ CROSSING FIX
-function generateCross(){
-
-let n1 = num1.value;
-let n2 = num2.value;
-let a = Number(points.value);
-
-let existing = new Set(
-[...crossGrid.querySelectorAll(".box")]
-.map(b => b.innerText.split("\n")[0])
-);
-
-for(let i of n1){
-for(let j of n2){
-
-let pair = i + j;
-
-if(existing.has(pair)) continue;
-
-dataArr.push({number:pair,amount:a});
-total += a;
-
-existing.add(pair);
-
-crossGrid.innerHTML += `
-<div class="box">${pair}<br>₹${a}</div>
-`;
-
-}
-}
-
-totalBox();
-}
-
-// ✅ COPY FIX
-function generateCopy(){
-
-let d = digits.value;
-let a = Number(amt.value);
-let palti = document.querySelector('input[name="p"]:checked').value;
-
-if(!d || !a) return alert("Fill data");
-
-let arr = d.match(/.{1,2}/g);
-
-let existing = new Set(
-[...document.querySelectorAll("#table tr td:first-child")]
-.map(td => td.innerText)
-);
-
-arr.forEach(num=>{
-
-if(num.length==1) num="0"+num;
-
-if(existing.has(num)) return;
-
-dataArr.push({number:num,amount:a});
-total+=a;
-
-existing.add(num);
-
-let row = document.createElement("tr");
-row.innerHTML = `
-<td>${num}</td>
-<td>${a}</td>
-<td><button onclick="removeRow('${num}', this)">Delete</button></td>
-`;
-table.appendChild(row);
-
-// PALTI
-if(palti==="with"){
-let rev = num.split("").reverse().join("");
-
-if(rev!==num && !existing.has(rev)){
-dataArr.push({number:rev,amount:a});
-total+=a;
-
-existing.add(rev);
-
-let row2 = document.createElement("tr");
-row2.innerHTML = `
-<td>${rev}</td>
-<td>${a}</td>
-<td><button onclick="removeRow('${rev}', this)">Delete</button></td>
-`;
-table.appendChild(row2);
-}
-}
-
-});
-
-totalBox();
-}
-
-// DELETE
-function removeRow(num, btn){
-dataArr = dataArr.filter(i=>i.number!==num);
-total=0;
-dataArr.forEach(i=> total+=i.amount);
-btn.parentElement.parentElement.remove();
-totalBox();
-}
-
+// TOTAL UI
 function totalBox(){
 document.getElementById("total").innerText="₹ "+total;
 }
 
+// SUBMIT
 async function submitAll(){
 if(total<=0){alert("No data");return;}
 
 let {data}=await client.from("login").select("balance").eq("id",user.id).single();
-if(data.balance<total){alert("Low balance");return;}
 
-await client.from("login").update({balance:data.balance-total}).eq("id",user.id);
+if(data.balance<total){
+alert("Low balance");
+return;
+}
 
+// UPDATE BALANCE
+await client.from("login")
+.update({balance:data.balance-total})
+.eq("id",user.id);
+
+// SAVE HISTORY
 await client.from("history").insert([{
 user_id:user.id,
-market:market,
 data:JSON.stringify(dataArr),
 total:total
 }]);
