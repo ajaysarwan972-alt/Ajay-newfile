@@ -64,13 +64,14 @@ cursor:pointer;
 <div class="topBtn btn2" onclick="showGame('haruf')">HARUF</div>
 <div class="topBtn btn3" onclick="showGame('crossing')">CROSSING</div>
 <div class="topBtn btn4" onclick="showGame('copy')">COPY</div>
-<div class="topBtn btn5" onclick="window.location.href='play.html'">TYP/IMAGE</div>
 </div>
 
+<!-- JODI -->
 <div id="jodi" class="game active container">
 <div class="grid" id="jodiGrid"></div>
 </div>
 
+<!-- HARUF -->
 <div id="haruf" class="game container">
 <h3>Single Andar</h3>
 <div class="grid" id="harufGrid1"></div>
@@ -78,6 +79,7 @@ cursor:pointer;
 <div class="grid" id="harufGrid2"></div>
 </div>
 
+<!-- CROSSING -->
 <div id="crossing" class="game container">
 <label>1ST NUMBER</label>
 <input id="num1">
@@ -89,6 +91,7 @@ cursor:pointer;
 <div id="crossGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;"></div>
 </div>
 
+<!-- COPY -->
 <div id="copy" class="game container">
 <label>ENTER DIGIT</label>
 <input id="digits">
@@ -108,18 +111,21 @@ cursor:pointer;
 
 <script>
 
-const client = supabase.createClient("URL","KEY");
+const client = supabase.createClient(
+"https://katbdbzoufiblnnsoxkk.supabase.co",
+"sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
+);
+
+const user = JSON.parse(localStorage.getItem("user"));
+const market = localStorage.getItem("market") || "UNKNOWN";
 
 let dataArr = [];
-let totalVal = 0;
-
-let lastCrossInput="";
-let lastCopyInput="";
+let total = 0;
 
 function updateTotal(){
-totalVal=0;
-dataArr.forEach(i=>totalVal+=i.amount);
-document.getElementById("total").innerText="₹ "+totalVal;
+total = 0;
+dataArr.forEach(i=>total+=i.amount);
+document.getElementById("total").innerText="₹ "+total;
 }
 
 function showGame(id){
@@ -127,7 +133,27 @@ document.querySelectorAll(".game").forEach(g=>g.classList.remove("active"));
 document.getElementById(id).classList.add("active");
 }
 
+// JODI
+for(let i=0;i<100;i++){
+let num=i.toString().padStart(2,'0');
+jodiGrid.innerHTML+=`<div class="box">${num}<input oninput="add('${num}',this.value)"></div>`;
+}
+
+// HARUF
+for(let i=0;i<10;i++){
+harufGrid1.innerHTML+=`<div class="box">${i}<input oninput="add('A${i}',this.value)"></div>`;
+harufGrid2.innerHTML+=`<div class="box">${i}<input oninput="add('B${i}',this.value)"></div>`;
+}
+
+function add(num,val){
+val=Number(val)||0;
+dataArr=dataArr.filter(x=>x.number!==num);
+if(val>0){dataArr.push({number:num,amount:val});}
+updateTotal();
+}
+
 // CROSSING FIX
+let lastCrossInput="";
 function generateCross(){
 let n1=num1.value.trim();
 let n2=num2.value.trim();
@@ -136,8 +162,6 @@ let a=Number(points.value);
 let current=n1+"|"+n2+"|"+a;
 if(current===lastCrossInput) return;
 lastCrossInput=current;
-
-if(!n1 || !n2 || a<=0) return;
 
 crossGrid.innerHTML="";
 dataArr=[];
@@ -157,6 +181,7 @@ updateTotal();
 }
 
 // COPY FIX
+let lastCopyInput="";
 function generateCopy(){
 let d=digits.value.trim();
 let a=Number(amt.value);
@@ -164,8 +189,6 @@ let a=Number(amt.value);
 let current=d+"|"+a;
 if(current===lastCopyInput) return;
 lastCopyInput=current;
-
-if(!d || a<=0) return;
 
 table.innerHTML=`<tr><th>NUMBER</th><th>AMOUNT</th><th>DEL</th></tr>`;
 dataArr=[];
