@@ -119,6 +119,28 @@ const client = supabase.createClient(
 );
 
 const user = JSON.parse(localStorage.getItem("user"));
+  
+// ✅ LOAD WALLET + ID
+loadUser();
+
+async function loadUser(){
+if(!user){
+alert("Login again");
+return;
+}
+
+document.getElementById("userId").innerText = "ID: " + user.id;
+
+let {data,error} = await client
+.from("login")
+.select("balance")
+.eq("id", user.id)
+.single();
+
+if(data){
+document.getElementById("wallet").innerText = "₹ " + data.balance;
+}
+}
 const market = localStorage.getItem("market") || "UNKNOWN";
 
 let dataArr = [];
