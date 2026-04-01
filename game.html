@@ -7,7 +7,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-body{font-family:Arial;margin:0;background:#e5e7eb;}
+body{font-family:Arial;margin:0;background:#e5e7eb;padding-bottom:80px;}
 
 .header{
 position:fixed;top:10px;left:10px;right:10px;
@@ -30,7 +30,7 @@ z-index:999;
 .game{display:none;}
 .active{display:block;}
 
-.container{margin:10px;background:#fff;padding:15px;border-radius:15px;padding-bottom:120px;}
+.container{margin:10px;background:#fff;padding:15px;border-radius:15px;padding-bottom:150px;}
 
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
 .box{background:#fff;padding:10px;border-radius:10px;text-align:center;border:1px solid #ddd;}
@@ -48,28 +48,6 @@ padding:15px;
 font-weight:bold;
 font-size:16px;
 cursor:pointer;
-}
-
-.popup{
-position:fixed;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-background:#222;
-color:#fff;
-padding:20px;
-border-radius:15px;
-display:none;
-z-index:9999;
-text-align:center;
-}
-.popup button{
-margin-top:10px;
-padding:8px 20px;
-border:none;
-background:#00b894;
-color:#fff;
-border-radius:10px;
 }
 </style>
 </head>
@@ -89,12 +67,10 @@ border-radius:10px;
 <div class="topBtn btn5" onclick="window.location.href='play.html'">TYP/IMAGE</div>
 </div>
 
-<!-- JODI -->
 <div id="jodi" class="game active container">
 <div class="grid" id="jodiGrid"></div>
 </div>
 
-<!-- HARUF -->
 <div id="haruf" class="game container">
 <h3>Single Andar</h3>
 <div class="grid" id="harufGrid1"></div>
@@ -102,7 +78,6 @@ border-radius:10px;
 <div class="grid" id="harufGrid2"></div>
 </div>
 
-<!-- CROSSING -->
 <div id="crossing" class="game container">
 <label>1ST NUMBER</label>
 <input id="num1">
@@ -114,7 +89,6 @@ border-radius:10px;
 <div id="crossGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;"></div>
 </div>
 
-<!-- COPY -->
 <div id="copy" class="game container">
 <label>ENTER DIGIT</label>
 <input id="digits">
@@ -132,31 +106,26 @@ border-radius:10px;
 <div class="submit" onclick="submitAll()">SUBMIT</div>
 </div>
 
-<div class="popup" id="popup">
-<div id="popupText"></div>
-<button onclick="closePopup()">OK</button>
-</div>
-
 <script>
 
 const client = supabase.createClient("URL","KEY");
 
-const user = JSON.parse(localStorage.getItem("user"));
-const market = localStorage.getItem("market") || "UNKNOWN";
-
 let dataArr = [];
-let total = 0;
+let totalVal = 0;
 
 let lastCrossInput="";
 let lastCopyInput="";
 
 function updateTotal(){
-total=0;
-dataArr.forEach(i=>total+=i.amount);
-total.innerText="₹ "+total;
+totalVal=0;
+dataArr.forEach(i=>totalVal+=i.amount);
+document.getElementById("total").innerText="₹ "+totalVal;
 }
 
-// JODI + HARUF same (unchanged)
+function showGame(id){
+document.querySelectorAll(".game").forEach(g=>g.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+}
 
 // CROSSING FIX
 function generateCross(){
@@ -167,6 +136,8 @@ let a=Number(points.value);
 let current=n1+"|"+n2+"|"+a;
 if(current===lastCrossInput) return;
 lastCrossInput=current;
+
+if(!n1 || !n2 || a<=0) return;
 
 crossGrid.innerHTML="";
 dataArr=[];
@@ -193,6 +164,8 @@ let a=Number(amt.value);
 let current=d+"|"+a;
 if(current===lastCopyInput) return;
 lastCopyInput=current;
+
+if(!d || a<=0) return;
 
 table.innerHTML=`<tr><th>NUMBER</th><th>AMOUNT</th><th>DEL</th></tr>`;
 dataArr=[];
