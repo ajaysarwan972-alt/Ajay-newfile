@@ -119,7 +119,7 @@ const client = supabase.createClient(
 );
 
 const user = JSON.parse(localStorage.getItem("user"));
-  
+  document.getElementById("userId").innerText = "ID: " + user.id;
 // ✅ LOAD WALLET + ID
 loadUser();
 
@@ -129,7 +129,7 @@ alert("Login again");
 return;
 }
 
-document.getElementById("userId").innerText = "ID: " + user.id;
+
 
 let {data,error} = await client
 .from("login")
