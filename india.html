@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>India Lottery</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f1f1f1;
+}
+
+.header{
+  background:#000;
+  color:#fff;
+  padding:10px;
+  text-align:center;
+  font-size:18px;
+}
+
+.wallet{
+  background:#fff;
+  padding:10px;
+  text-align:center;
+  font-weight:bold;
+  border-bottom:2px solid #ddd;
+}
+
+.table{
+  width:100%;
+  border-collapse:collapse;
+  background:#fff;
+}
+
+.table th{
+  color:blue;
+  padding:10px;
+  border:1px solid #ddd;
+}
+
+.table td{
+  text-align:center;
+  padding:12px;
+  border:1px solid #ddd;
+  font-weight:bold;
+}
+
+.time{
+  font-size:15px;
+}
+
+.box{
+  cursor:pointer;
+}
+
+.box:hover{
+  background:#eee;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+Select Date: <input type="date" id="date">
+</div>
+
+<div class="wallet">
+Wallet: ₹ <span id="balance">0</span>
+</div>
+
+<table class="table">
+<tr>
+<th>DrawTime</th>
+<th>SANGAM</th>
+<th>CHETAK</th>
+<th>SUPER</th>
+</tr>
+
+<tbody id="data"></tbody>
+</table>
+
+<script>
+const supabaseUrl = "https://katbdbzoufiblnnsoxkk.supabase.co";
+const supabaseKey = "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a";
+
+const client = supabase.createClient(supabaseUrl, supabaseKey);
+
+// 🔐 LOGIN + WALLET
+async function loadUser(){
+  const { data } = await client.from("login").select("*").limit(1);
+
+  if(!data || data.length === 0){
+    window.location = "login.html";
+    return;
+  }
+
+  // 👉 wallet column hona chahiye login table me
+  document.getElementById("balance").innerText = data[0].wallet || 0;
+}
+loadUser();
+
+// 🧾 DATA LOAD
+async function loadData(){
+  const { data, error } = await client
+  .from("india_result")
+  .select("*")
+  .order("time", { ascending: true });
+
+  let html = "";
+
+  data.forEach(row => {
+    html += `
+    <tr>
+      <td class="time">${row.time}</td>
+
+      <td class="box" onclick="openGame('${row.time}','SANGAM')">
+        ${row.sangam || '--'}
+      </td>
+
+      <td class="box" onclick="openGame('${row.time}','CHETAK')">
+        ${row.chetak || '--'}
+      </td>
+
+      <td class="box" onclick="openGame('${row.time}','SUPER')">
+        ${row.super || '--'}
+      </td>
+
+    </tr>
+    `;
+  });
+
+  document.getElementById("data").innerHTML = html;
+}
+
+loadData();
+
+// 🔗 GAME PAGE OPEN
+function openGame(time, game){
+  window.location = `game.html?time=${time}&game=${game}`;
+}
+</script>
+
+</body>
+</html>
