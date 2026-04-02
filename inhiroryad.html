@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin History</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f1f1f1;
+}
+
+.header{
+  background:black;
+  color:white;
+  padding:12px;
+  text-align:center;
+  font-size:18px;
+}
+
+.filters{
+  background:#fff;
+  padding:10px;
+  display:flex;
+  gap:10px;
+}
+
+select,input{
+  flex:1;
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
+
+.container{
+  padding:10px;
+}
+
+.card{
+  background:#fff;
+  padding:12px;
+  margin-bottom:10px;
+  border-radius:10px;
+  border-left:5px solid red;
+}
+
+.top{
+  display:flex;
+  justify-content:space-between;
+  font-weight:bold;
+}
+
+.market{color:blue;}
+.total{color:red;}
+
+.data{
+  margin-top:8px;
+  font-size:14px;
+}
+
+.date{
+  font-size:12px;
+  color:#888;
+  margin-top:5px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">ADMIN HISTORY</div>
+
+<div class="filters">
+  <select id="marketFilter" onchange="loadHistory()">
+    <option value="">All Market</option>
+    <option value="INDIA">INDIA</option>
+  </select>
+
+  <input id="userFilter" placeholder="User ID" oninput="loadHistory()">
+</div>
+
+<div class="container" id="history"></div>
+
+<script>
+const client = supabase.createClient(
+"https://katbdbzoufiblnnsoxkk.supabase.co",
+"sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
+);
+
+// 📊 LOAD HISTORY WITH FILTER
+async function loadHistory(){
+
+  let market = document.getElementById("marketFilter").value;
+  let userId = document.getElementById("userFilter").value;
+
+  let query = client
+  .from("history")
+  .select("*")
+  .order("id", { ascending: false });
+
+  if(market){
+    query = query.eq("market", market);
+  }
+
+  if(userId){
+    query = query.eq("user_id", userId);
+  }
+
+  let { data } = await query;
+
+  let html = "";
+
+  if(!data || data.length === 0){
+    html = "<p style='text-align:center;'>No Data</p>";
+  }else{
+
+    data.forEach(item => {
+
+      let numbers = item.data.map(d => `${d.number}(${d.amount})`).join(", ");
+
+      html += `
+      <div class="card">
+        <div class="top">
+          <div>ID: ${item.user_id}</div>
+          <div class="total">₹ ${item.total}</div>
+        </div>
+
+        <div class="market">${item.market}</div>
+
+        <div class="data">${numbers}</div>
+
+        <div class="date">
+          ${new Date(item.created_at).toLocaleString()}
+        </div>
+      </div>
+      `;
+    });
+
+  }
+
+  document.getElementById("history").innerHTML = html;
+}
+
+loadHistory();
+</script>
+
+</body>
+</html>
