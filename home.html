@@ -165,7 +165,6 @@ body{
 <div id="menuBtn" onclick="openMenu()">☰</div>
 <div id="userId">ID: 0000</div>
 
-<!-- 🔥 CLICKABLE WALLET -->
 <div id="wallet" onclick="goWallet()">₹ 0</div>
 
 <div class="actionBar">
@@ -178,10 +177,13 @@ body{
 
 <a class="whatsapp" href="https://wa.me/" target="_blank">💬</a>
 
-<!-- 🔥 UPDATED NAV -->
+<!-- ✅ UPDATED NAV -->
 <div id="bottomNav">
   <div class="navBtn active">Home</div>
-  <div class="navBtn">Game</div>
+
+  <!-- 🔥 PLAY INDIA BUTTON -->
+  <div class="navBtn" onclick="window.location.href='india.html'">PLAY INDIA</div>
+
   <div class="navBtn" onclick="goWallet()">Wallet</div>
   <div class="navBtn">Profile</div>
 </div>
@@ -310,6 +312,7 @@ setInterval(()=>{
   loadWallet();
 },60000);
 </script>
+
 <script src="common.js"></script>
 </body>
 </html>
