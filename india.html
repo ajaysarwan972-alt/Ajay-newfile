@@ -7,65 +7,21 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-body{
-  margin:0;
-  font-family:Arial;
-  background:#f1f1f1;
-}
+body{margin:0;font-family:Arial;background:#f1f1f1;}
 
-.header{
-  background:#000;
-  color:#fff;
-  padding:10px;
-  text-align:center;
-  font-size:18px;
-}
+.header{background:#000;color:#fff;padding:10px;text-align:center;}
+.wallet{background:#fff;padding:10px;text-align:center;font-weight:bold;}
 
-.wallet{
-  background:#fff;
-  padding:10px;
-  text-align:center;
-  font-weight:bold;
-  border-bottom:2px solid #ddd;
-}
-
-.table{
-  width:100%;
-  border-collapse:collapse;
-  background:#fff;
-}
-
-.table th{
-  color:blue;
-  padding:10px;
-  border:1px solid #ddd;
-}
-
-.table td{
-  text-align:center;
-  padding:12px;
-  border:1px solid #ddd;
-  font-weight:bold;
-}
-
-.time{
-  font-size:15px;
-}
-
-.box{
-  cursor:pointer;
-}
-
-.box:hover{
-  background:#eee;
-}
+.table{width:100%;border-collapse:collapse;background:#fff;}
+.table th{color:blue;padding:10px;border:1px solid #ddd;}
+.table td{text-align:center;padding:12px;border:1px solid #ddd;font-weight:bold;}
 </style>
 </head>
 
 <body>
 
 <div class="header">
-Select Date: <input type="date" id="date">
+Select Date: <input type="date">
 </div>
 
 <div class="wallet">
@@ -84,51 +40,75 @@ Wallet: ₹ <span id="balance">0</span>
 </table>
 
 <script>
-const supabaseUrl = "https://katbdbzoufiblnnsoxkk.supabase.co";
-const supabaseKey = "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a";
+const client = supabase.createClient(
+"https://katbdbzoufiblnnsoxkk.supabase.co",
+"sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
+);
 
-const client = supabase.createClient(supabaseUrl, supabaseKey);
+const user = JSON.parse(localStorage.getItem("user"));
 
-// 🔐 LOGIN + WALLET
+// ✅ USER + WALLET
 async function loadUser(){
-  const { data } = await client.from("login").select("*").limit(1);
-
-  if(!data || data.length === 0){
-    window.location = "login.html";
+  if(!user){
+    window.location="login.html";
     return;
   }
 
-  // 👉 wallet column hona chahiye login table me
-  document.getElementById("balance").innerText = data[0].wallet || 0;
+  let {data} = await client
+  .from("login")
+  .select("balance")
+  .eq("id", user.id)
+  .single();
+
+  if(data){
+    document.getElementById("balance").innerText = data.balance;
+  }
 }
 loadUser();
 
-// 🧾 DATA LOAD
+// ✅ RUNNING CHECK
+function checkRunning(time){
+  let now = new Date();
+
+  let [h,m] = time.split(":");
+  let gameTime = new Date();
+  gameTime.setHours(h, m, 0);
+
+  let closeTime = new Date(gameTime.getTime() + 15*60000);
+
+  return now >= gameTime && now <= closeTime;
+}
+
+// ✅ LOAD DATA
 async function loadData(){
-  const { data, error } = await client
+  const { data } = await client
   .from("india_result")
   .select("*")
-  .order("time", { ascending: true });
+  .order("id", { ascending: false });
+
+  let unique = {};
+
+  data.forEach(row => {
+    if(!unique[row.time]){
+      unique[row.time] = row;
+    }
+  });
 
   let html = "";
 
-  data.forEach(row => {
+  Object.values(unique).forEach(row => {
+
+    let isOpen = checkRunning(row.time);
+
     html += `
-    <tr>
-      <td class="time">${row.time}</td>
-
-      <td class="box" onclick="openGame('${row.time}','SANGAM')">
-        ${row.sangam || '--'}
-      </td>
-
-      <td class="box" onclick="openGame('${row.time}','CHETAK')">
-        ${row.chetak || '--'}
-      </td>
-
-      <td class="box" onclick="openGame('${row.time}','SUPER')">
-        ${row.super || '--'}
-      </td>
-
+    <tr 
+      style="${!isOpen ? 'opacity:0.5' : ''}"
+      ${isOpen ? `onclick="openGame('${row.time}')"` : ''}
+    >
+      <td>${row.time}</td>
+      <td>${row.sangam || '--'}</td>
+      <td>${row.chetak || '--'}</td>
+      <td>${row.super || '--'}</td>
     </tr>
     `;
   });
@@ -138,9 +118,11 @@ async function loadData(){
 
 loadData();
 
-// 🔗 GAME PAGE OPEN
-function openGame(time, game){
-  window.location = `game.html?time=${time}&game=${game}`;
+// ✅ OPEN GAME
+function openGame(time){
+  localStorage.setItem("time", time);
+  localStorage.setItem("market","INDIA");
+  window.location.href="game.html";
 }
 </script>
 
