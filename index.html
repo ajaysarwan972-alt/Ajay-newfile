@@ -5,69 +5,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Login / Signup</title>
 
-<!-- 🔥 PWA ADD -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#ff0000">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-body{
-margin:0;
-font-family:Arial;
-background:#f2f2f2;
-text-align:center;
-}
-
-.top{
-background:red;
-height:40px;
-}
-
-h1{
-color:red;
-margin-top:30px;
-}
-
-.input{
-width:85%;
-margin:12px auto;
-padding:15px;
-border-radius:20px;
-border:none;
-box-shadow:0 3px 10px rgba(0,0,0,0.2);
-font-size:16px;
-}
-
-.btn{
-width:85%;
-padding:15px;
-border:none;
-border-radius:30px;
-background:red;
-color:#fff;
-font-size:18px;
-font-weight:bold;
-margin-top:15px;
-}
-
-.blueBtn{
-background:#3498db;
-}
-
-.link{
-color:red;
-font-weight:bold;
-cursor:pointer;
-}
-
-.page{
-display:none;
-}
-
-.active{
-display:block;
-}
+body{margin:0;font-family:Arial;background:#f2f2f2;text-align:center;}
+.top{background:red;height:40px;}
+h1{color:red;margin-top:30px;}
+.input{width:85%;margin:12px auto;padding:15px;border-radius:20px;border:none;box-shadow:0 3px 10px rgba(0,0,0,0.2);font-size:16px;}
+.btn{width:85%;padding:15px;border:none;border-radius:30px;background:red;color:#fff;font-size:18px;font-weight:bold;margin-top:15px;}
+.blueBtn{background:#3498db;}
+.link{color:red;font-weight:bold;cursor:pointer;}
+.page{display:none;}
+.active{display:block;}
 </style>
 
 </head>
@@ -84,8 +36,6 @@ display:block;
 <input id="loginMobile" class="input" placeholder="Mobile Number">
 <input id="loginPassword" type="password" class="input" placeholder="Password">
 
-<p class="link">Forgot Password?</p>
-
 <button class="btn" onclick="login()">LOGIN</button>
 
 <p>New User?</p>
@@ -97,8 +47,6 @@ display:block;
 <div id="signupPage" class="page">
 
 <h1>Create Account</h1>
-
-<p class="link" onclick="location.reload()">🔄 Refresh URL</p>
 
 <input id="name" class="input" placeholder="Full Name">
 <input id="mobile" class="input" placeholder="Mobile Number">
@@ -113,12 +61,7 @@ display:block;
 
 <script>
 
-// 🔥 SERVICE WORKER REGISTER
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js');
-}
-
-// 🔥 SUPABASE
+// SUPABASE
 const client = supabase.createClient(
 "https://katbdbzoufiblnnsoxkk.supabase.co",
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
@@ -148,7 +91,7 @@ return;
 
 let {data,error} = await client
 .from("login")
-.select("id,mobile")
+.select("*")
 .eq("mobile",mobile)
 .eq("password",password)
 .single();
@@ -158,14 +101,8 @@ alert("Wrong Mobile or Password ❌");
 return;
 }
 
-localStorage.clear();
-
-localStorage.setItem("user",JSON.stringify({
-id:data.id,
-mobile:data.mobile
-}));
-
-localStorage.setItem("user_id",data.id);
+// ✅ LOCAL STORAGE SAVE (IMPORTANT)
+localStorage.setItem("user", JSON.stringify(data));
 
 alert("Login Success ✅");
 location.href="home.html";
@@ -177,11 +114,15 @@ async function signup(){
 let name = document.getElementById("name").value.trim();
 let mobile = document.getElementById("mobile").value.trim();
 let password = document.getElementById("password").value.trim();
+let ref = document.getElementById("ref").value.trim();
 
 if(!name || !mobile || !password){
 alert("Sab fill kar");
 return;
 }
+
+// 🔥 REF CODE = mobile use kar rahe
+let ref_code = mobile;
 
 let {error} = await client
 .from("login")
@@ -189,7 +130,9 @@ let {error} = await client
 name:name,
 mobile:mobile,
 password:password,
-balance:0
+balance:0,
+ref_code: ref_code,
+ref_by: ref || null
 }]);
 
 if(error){
@@ -202,6 +145,6 @@ showPage('loginPage');
 }
 
 </script>
-<script src="common.js"></script>
+
 </body>
 </html>
