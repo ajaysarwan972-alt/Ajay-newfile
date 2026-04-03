@@ -1,95 +1,145 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Signup</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create Account</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial;
-      background: linear-gradient(135deg, red, black);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f2f2f2;
+  text-align:center;
+}
 
-    .card {
-      background: white;
-      padding: 25px;
-      border-radius: 15px;
-      width: 300px;
-      text-align: center;
-    }
+.top{
+  background:red;
+  height:50px;
+}
 
-    input {
-      width: 100%;
-      padding: 10px;
-      margin: 8px 0;
-      border-radius: 20px;
-      border: 1px solid #ccc;
-    }
+.logo{
+  margin-top:20px;
+}
 
-    button {
-      width: 100%;
-      padding: 12px;
-      border: none;
-      border-radius: 25px;
-      background: red;
-      color: white;
-      font-weight: bold;
-    }
-  </style>
+.logo img{
+  width:90px;
+  border-radius:50%;
+}
+
+h1{
+  color:red;
+  margin-top:15px;
+}
+
+.container{
+  width:90%;
+  margin:auto;
+}
+
+.input{
+  width:100%;
+  margin:12px 0;
+  padding:15px;
+  border-radius:25px;
+  border:none;
+  box-shadow:0 4px 12px rgba(0,0,0,0.2);
+  font-size:16px;
+}
+
+.btn{
+  width:100%;
+  padding:15px;
+  border:none;
+  border-radius:30px;
+  background:red;
+  color:#fff;
+  font-size:18px;
+  font-weight:bold;
+  margin-top:15px;
+}
+
+.link{
+  margin-top:15px;
+  color:#333;
+}
+.link span{
+  color:red;
+  font-weight:bold;
+  cursor:pointer;
+}
+</style>
+
 </head>
 
 <body>
 
-<div class="card">
-  <h2>Signup</h2>
+<div class="top"></div>
 
-  <input id="name" type="text" placeholder="Full Name">
-  <input id="mobile" type="text" placeholder="Mobile Number">
-  <input id="password" type="password" placeholder="Password">
+<div class="logo">
+  <img src="https://i.imgur.com/2yaf2wb.png">
+</div>
 
-  <button onclick="signup()">REGISTER</button>
+<h1>Create Account</h1>
+
+<div class="container">
+
+<input id="name" class="input" placeholder="Full Name">
+<input id="mobile" class="input" placeholder="Mobile Number">
+<input id="password" type="password" class="input" placeholder="Password">
+
+<!-- ✅ REFERRAL INPUT -->
+<input id="ref" class="input" placeholder="Referral Code (Optional)">
+
+<button class="btn" onclick="signup()">REGISTER</button>
+
+<p class="link">Already a Member? 
+<span onclick="location.href='index.html'">Login</span>
+</p>
+
 </div>
 
 <script>
 
-// 🔥 SUPABASE (APNI DALNA)
-const SUPABASE_URL = "https://katbdbzoufiblnnsoxkk.supabase.co";
-const SUPABASE_KEY = "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a";
+// SUPABASE
+const client = supabase.createClient(
+"https://katbdbzoufiblnnsoxkk.supabase.co",
+"sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
+);
 
-const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// SIGNUP
+async function signup(){
 
-// 🔥 SIGNUP FUNCTION
-async function signup() {
+let name = document.getElementById("name").value.trim();
+let mobile = document.getElementById("mobile").value.trim();
+let password = document.getElementById("password").value.trim();
+let ref = document.getElementById("ref").value.trim();
 
-  let name = document.getElementById("name").value;
-  let mobile = document.getElementById("mobile").value;
-  let password = document.getElementById("password").value;
+if(!name || !mobile || !password){
+alert("Sab fill kar");
+return;
+}
 
-  // validation
-  if(!name || !mobile || !password){
-    alert("Sab fill kar");
-    return;
-  }
+// 👉 SYSTEM SAME (bas 2 field add)
+let { error } = await client
+.from("login")
+.insert([{
+  name:name,
+  mobile:mobile,
+  password:password,
+  balance:0,
+  ref_code: mobile,
+  ref_by: ref || null
+}]);
 
-  // insert data
-  let { data, error } = await client
-    .from("login")
-    .insert([
-      { name: name, mobile: mobile, password: password, balance: 0 }
-    ]);
+if(error){
+alert("Error: " + error.message);
+}else{
+alert("Signup Success ✅");
+location.href="index.html";
+}
 
-  if(error){
-    alert("Error: " + error.message);
-  } else {
-    alert("Signup Success ✅");
-    window.location.href = "index.html";
-  }
 }
 
 </script>
