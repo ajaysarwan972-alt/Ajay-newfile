@@ -79,6 +79,10 @@ const client = supabase.createClient(
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
+// 🔥 URL se mode pakad
+const params = new URLSearchParams(window.location.search);
+const filterMode = params.get("mode"); // 1 ya 2
+
 async function loadHistory(){
 
     let { data, error } = await client
@@ -92,15 +96,20 @@ async function loadHistory(){
         return;
     }
 
+    // 🔥 MODE FILTER
+    if(filterMode){
+        data = data.filter(i => String(i.mode || "1") === filterMode);
+    }
+
     let html = "";
 
     data.forEach(item=>{
 
         let date = new Date(item.created_at).toLocaleString();
-        let mode = item.mode || "1"; // ✅ mode
+        let mode = item.mode || "1";
 
         // =========================
-        // ✅ TYPING
+        // TYPING
         if(item.typing){
             html += `
             <div class="card">
@@ -116,7 +125,7 @@ async function loadHistory(){
         }
 
         // =========================
-        // ✅ IMAGE
+        // IMAGE
         if(item.image){
             html += `
             <div class="card">
@@ -134,7 +143,7 @@ async function loadHistory(){
         }
 
         // =========================
-        // ✅ NORMAL DATA (UNLIMITED CARDS)
+        // NORMAL DATA
         if(item.data){
 
             let arr = [];
@@ -142,7 +151,7 @@ async function loadHistory(){
             try{
                 arr = JSON.parse(item.data);
             }catch{
-                arr = []; // ❌ skip nahi hoga
+                arr = [];
             }
 
             if(Array.isArray(arr)){
@@ -173,7 +182,6 @@ async function loadHistory(){
                         amount = "";
                     }
 
-                    // ✅ HAR BET = ALAG CARD
                     html += `
                     <div class="card">
                         <div class="row">
