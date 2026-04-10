@@ -169,7 +169,6 @@ body{
 <div id="userId">ID: 0000</div>
 <div id="wallet" onclick="goWallet()">₹ 0</div>
 
-<!-- 🔥 FULL WIDTH BUTTON -->
 <button class="topBtnFull" onclick="alert('Rate applied 🔥')">
   10 ke 950 rate game
 </button>
@@ -290,11 +289,14 @@ function go(page){
   window.location.href = page;
 }
 
+/* ✅ SIRF YAHI CHANGE KIYA */
 function shareApp(){
+  let link = "referral.html?ref=" + user.id;
+
   navigator.share({
     title: "My App",
     text: "Join now",
-    url: window.location.href
+    url: link
   });
 }
 
