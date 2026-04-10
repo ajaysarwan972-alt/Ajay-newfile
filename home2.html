@@ -13,7 +13,6 @@ body{
   background:#f2f2f2;
 }
 
-/* TOP */
 #menuBtn{
   position:fixed;
   left:15px;
@@ -48,7 +47,6 @@ body{
   cursor:pointer;
 }
 
-/* 🔥 TOP BUTTON */
 .topBtnFull{
   margin-top:80px;
   margin-left:10px;
@@ -65,7 +63,6 @@ body{
   cursor:pointer;
 }
 
-/* ACTION */
 .actionBar{
   margin-top:10px;
   display:flex;
@@ -87,7 +84,6 @@ body{
 .withdraw{background:#ff4d4d;}
 .share{background:#6c5ce7;}
 
-/* BOX */
 .container{
   display:flex;
   flex-wrap:wrap;
@@ -116,7 +112,6 @@ body{
   margin-top:10px;
 }
 
-/* WHATSAPP */
 .whatsapp{
   position:fixed;
   bottom:80px;
@@ -132,7 +127,6 @@ body{
   font-size:28px;
 }
 
-/* NAV */
 #bottomNav{
   position:fixed;
   bottom:0;
@@ -169,8 +163,9 @@ body{
 <div id="userId">ID: 0000</div>
 <div id="wallet" onclick="goWallet()">₹ 0</div>
 
-<button class="topBtnFull" onclick="alert('Rate applied 🔥')">
-  10 ke 950 rate game
+<!-- ✅ CHANGED BUTTON -->
+<button class="topBtnFull">
+  1 ke 90 rate game
 </button>
 
 <div class="actionBar">
@@ -245,10 +240,10 @@ async function loadButtons(){
 
   let { data } = await client
   .from("Game result")
-  .select("name, number, open, close");
+  .select("name, number, open, close2");
 
   data.sort((a, b) => {
-    return checkStatus(b.open, b.close) - checkStatus(a.open, a.close);
+    return checkStatus(b.open, b.close2) - checkStatus(a.open, a.close2);
   });
 
   let container = document.getElementById("container");
@@ -256,7 +251,7 @@ async function loadButtons(){
 
   data.forEach(item => {
 
-    let isOpen = checkStatus(item.open, item.close);
+    let isOpen = checkStatus(item.open, item.close2);
 
     let btn = document.createElement("div");
     btn.className = "btn";
@@ -264,7 +259,7 @@ async function loadButtons(){
     btn.innerHTML = `
       <div class="gameName">${item.name}</div>
       <div class="gameNumber">${item.number || '**'}</div>
-      <div class="gameTime">${item.open} - ${item.close}</div>
+      <div class="gameTime">${item.open} - ${item.close2}</div>
       <div class="status">
         <img src="${isOpen 
           ? 'https://cdn-icons-png.flaticon.com/512/190/190411.png' 
@@ -275,7 +270,7 @@ async function loadButtons(){
     if(isOpen){
       btn.onclick = () => {
         localStorage.setItem("market", item.name);
-        window.location.href = "game.html";
+        window.location.href = "game2.html";
       };
     } else {
       btn.style.opacity = "0.6";
@@ -289,7 +284,6 @@ function go(page){
   window.location.href = page;
 }
 
-/* ✅ FINAL CHANGE */
 function shareApp(){
   window.location.href = "https://ajaysarwan972-alt.github.io/Ajay-newfile/referral.html";
 }
