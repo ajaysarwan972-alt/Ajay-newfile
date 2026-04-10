@@ -19,8 +19,6 @@ body{
   left:15px;
   top:20px;
   font-size:22px;
-  z-index:999;
-  cursor:pointer;
 }
 
 #userId{
@@ -32,7 +30,6 @@ body{
   padding:8px 18px;
   border-radius:20px;
   font-weight:bold;
-  z-index:999;
 }
 
 #wallet{
@@ -44,33 +41,26 @@ body{
   padding:8px 18px;
   border-radius:20px;
   font-weight:bold;
-  z-index:999;
-  cursor:pointer;
 }
 
-/* TOP BUTTON */
+/* BUTTON */
 .topBtnFull{
   margin-top:80px;
   margin-left:10px;
-  margin-right:10px;
   width:calc(100% - 20px);
   background:#111;
   color:#fff;
-  text-align:center;
   padding:14px;
   border-radius:15px;
   font-weight:bold;
-  font-size:16px;
   border:none;
-  cursor:pointer;
 }
 
 /* ACTION */
 .actionBar{
-  margin-top:10px;
   display:flex;
   justify-content:space-around;
-  padding:10px;
+  margin-top:10px;
 }
 
 .actionBtn{
@@ -80,119 +70,94 @@ body{
   text-align:center;
   color:white;
   font-weight:bold;
-  cursor:pointer;
 }
 
 .add{background:green;}
-.withdraw{background:#ff4d4d;}
+.withdraw{background:red;}
 .share{background:#6c5ce7;}
 
-/* BOX */
 .container{
   display:flex;
   flex-wrap:wrap;
-  justify-content:center;
-  margin-top:10px;
   padding:10px;
-  gap:12px;
+  gap:10px;
 }
 
 .btn{
-  width:calc(50% - 10px);
+  width:48%;
   background:#fff;
   border:3px solid green;
-  border-radius:20px;
+  border-radius:15px;
   padding:15px;
-  box-sizing:border-box;
   text-align:center;
 }
 
-.gameName{font-size:18px;font-weight:bold;}
-.gameNumber{font-size:26px;color:red;font-weight:bold;margin:5px 0;}
-.gameTime{font-size:14px;color:#1e73be;margin-bottom:10px;}
+.gameNumber{color:red;font-size:24px;font-weight:bold;}
+.gameTime{color:#1e73be;}
 
-.status img{
-  width:70px;
-  margin-top:10px;
-}
-
-/* NAV */
-#bottomNav{
-  position:fixed;
-  bottom:0;
-  left:0;
-  width:100%;
-  height:60px;
-  background:#fff;
-  display:flex;
-  justify-content:space-around;
-  align-items:center;
-}
-
-.navBtn{
-  width:22%;
-  height:40px;
-  background:#eee;
-  border-radius:10px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-}
-
-.active{
-  background:green;
-  color:white;
-}
+.status img{width:60px;}
 </style>
 </head>
 
 <body>
 
-<div id="menuBtn" onclick="openMenu()">☰</div>
-<div id="userId">ID: 0000</div>
-<div id="wallet" onclick="goWallet()">₹ 0</div>
+<div id="menuBtn">☰</div>
+<div id="userId">ID: 0</div>
+<div id="wallet">₹ 0</div>
 
-<!-- ✅ MODE 2 BUTTON -->
-<button class="topBtnFull" onclick="openMode2()">
+<button class="topBtnFull" onclick="changeMode()">
   10 ke 950
 </button>
 
 <div class="actionBar">
-  <div class="actionBtn add" onclick="go('deposit.html')">Add Money</div>
-  <div class="actionBtn withdraw" onclick="go('withdraw.html')">Withdraw</div>
-  <div class="actionBtn share" onclick="shareApp()">Share</div>
+  <div class="actionBtn add">Add</div>
+  <div class="actionBtn withdraw">Withdraw</div>
+  <div class="actionBtn share">Share</div>
 </div>
 
 <div class="container" id="container"></div>
 
-<div id="bottomNav">
-  <div class="navBtn active">Home</div>
-  <div class="navBtn" onclick="window.location.href='india.html'">PLAY INDIA</div>
-  <div class="navBtn" onclick="goWallet()">Wallet</div>
-  <div class="navBtn">Profile</div>
-</div>
-
-<script src="menu.js"></script>
-
 <script>
 const user = JSON.parse(localStorage.getItem("user"));
-
-if(!user){
-  window.location.href = "index.html";
-}
 
 const client = supabase.createClient(
   "https://katbdbzoufiblnnsoxkk.supabase.co",
   "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
+/* ✅ MODE BUTTON TEXT */
+function setModeBtn(){
+  let mode = localStorage.getItem("gameMode");
+
+  let btn = document.querySelector(".topBtnFull");
+
+  if(mode === "10x"){
+    btn.innerText = "1 ke 90";
+  } else {
+    btn.innerText = "10 ke 950";
+  }
+}
+
+/* ✅ MODE CHANGE */
+function changeMode(){
+  let mode = localStorage.getItem("gameMode");
+
+  if(mode === "10x"){
+    localStorage.setItem("gameMode","simple");
+  } else {
+    localStorage.setItem("gameMode","10x");
+  }
+
+  location.reload();
+}
+
+/* WALLET */
 async function loadWallet(){
   const { data } = await client
-    .from("login")
-    .select("balance")
-    .eq("id", user.id)
-    .single();
+  .from("login")
+  .select("balance")
+  .eq("id", user.id)
+  .single();
 
   if(data){
     document.getElementById("wallet").innerText = "₹ " + data.balance;
@@ -200,54 +165,44 @@ async function loadWallet(){
   }
 }
 
-function checkStatus(openTime, closeTime){
-  if(!openTime || !closeTime) return false;
-
+/* TIME CHECK */
+function checkStatus(open, close){
   let now = new Date();
 
-  const [oh, om] = openTime.split(":");
-  const [ch, cm] = closeTime.split(":");
+  let [oh, om] = open.split(":");
+  let [ch, cm] = close.split(":");
 
-  let open = new Date();
-  open.setHours(oh, om, 0);
+  let o = new Date(); o.setHours(oh,om,0);
+  let c = new Date(); c.setHours(ch,cm,0);
 
-  let close = new Date();
-  close.setHours(ch, cm, 0);
-
-  if(close < open){
-    close.setDate(close.getDate() + 1);
-    if(now < open){
-      now.setDate(now.getDate() + 1);
-    }
-  }
-
-  return (now >= open && now <= close);
+  return now >= o && now <= c;
 }
 
+/* LOAD GAMES */
 async function loadButtons(){
+
+  let mode = localStorage.getItem("gameMode") || "simple";
 
   let { data } = await client
   .from("Game result")
-  .select("name, number, open, close");
-
-  data.sort((a, b) => {
-    return checkStatus(b.open, b.close) - checkStatus(a.open, a.close);
-  });
+  .select("*");
 
   let container = document.getElementById("container");
   container.innerHTML = "";
 
   data.forEach(item => {
 
-    let isOpen = checkStatus(item.open, item.close);
+    let closeCol = mode === "10x" ? item.close2 : item.close;
 
-    let btn = document.createElement("div");
-    btn.className = "btn";
+    let isOpen = checkStatus(item.open, closeCol);
 
-    btn.innerHTML = `
-      <div class="gameName">${item.name}</div>
+    let div = document.createElement("div");
+    div.className = "btn";
+
+    div.innerHTML = `
+      <div>${item.name}</div>
       <div class="gameNumber">${item.number || '**'}</div>
-      <div class="gameTime">${item.open} - ${item.close}</div>
+      <div class="gameTime">${item.open} - ${closeCol}</div>
       <div class="status">
         <img src="${isOpen 
           ? 'https://cdn-icons-png.flaticon.com/512/190/190411.png' 
@@ -256,46 +211,20 @@ async function loadButtons(){
     `;
 
     if(isOpen){
-      btn.onclick = () => {
+      div.onclick = ()=>{
         localStorage.setItem("market", item.name);
-        localStorage.setItem("gameMode", "simple"); // ✅ Mode 1
         window.location.href = "game.html";
-      };
-    } else {
-      btn.style.opacity = "0.6";
+      }
     }
 
-    container.appendChild(btn);
+    container.appendChild(div);
   });
 }
 
-/* 🔥 MODE 2 */
-function openMode2(){
-  localStorage.setItem("gameMode", "10x");
-  window.location.href = "game.html";
-}
-
-function go(page){
-  window.location.href = page;
-}
-
-function shareApp(){
-  window.location.href = "https://ajaysarwan972-alt.github.io/Ajay-newfile/referral.html";
-}
-
-function goWallet(){
-  window.location.href = "wallet.html";
-}
-
+setModeBtn();
 loadWallet();
 loadButtons();
-
-setInterval(()=>{
-  loadButtons();
-  loadWallet();
-},60000);
 </script>
 
-<script src="common.js"></script>
 </body>
 </html>
