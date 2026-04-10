@@ -89,7 +89,7 @@ h1{
 <input id="mobile" class="input" placeholder="Mobile Number">
 <input id="password" type="password" class="input" placeholder="Password">
 
-<!-- ✅ REFERRAL INPUT -->
+<!-- OPTIONAL REF -->
 <input id="ref" class="input" placeholder="Referral Code (Optional)">
 
 <button class="btn" onclick="signup()">REGISTER</button>
@@ -101,6 +101,14 @@ h1{
 </div>
 
 <script>
+
+// 🔥 REF AUTO CAPTURE (LINK SE)
+let params = new URLSearchParams(window.location.search);
+let autoRef = params.get("ref");
+
+if(autoRef){
+  localStorage.setItem("ref_by", autoRef);
+}
 
 // SUPABASE
 const client = supabase.createClient(
@@ -114,14 +122,28 @@ async function signup(){
 let name = document.getElementById("name").value.trim();
 let mobile = document.getElementById("mobile").value.trim();
 let password = document.getElementById("password").value.trim();
-let ref = document.getElementById("ref").value.trim();
+let manualRef = document.getElementById("ref").value.trim();
+
+// 🔥 FINAL REF LOGIC
+let ref_by = manualRef || localStorage.getItem("ref_by") || null;
 
 if(!name || !mobile || !password){
 alert("Sab fill kar");
 return;
 }
 
-// 👉 SYSTEM SAME (bas 2 field add)
+// MOBILE DUPLICATE CHECK
+let { data:exist } = await client
+.from("login")
+.select("*")
+.eq("mobile", mobile);
+
+if(exist.length > 0){
+alert("Number already registered");
+return;
+}
+
+// INSERT
 let { error } = await client
 .from("login")
 .insert([{
@@ -129,14 +151,19 @@ let { error } = await client
   mobile:mobile,
   password:password,
   balance:0,
-  ref_code: mobile,
-  ref_by: ref || null
+  ref_code: mobile,   // apna referral code
+  ref_by: ref_by      // jisne refer kiya
 }]);
 
 if(error){
 alert("Error: " + error.message);
 }else{
+
 alert("Signup Success ✅");
+
+// REF CLEAR
+localStorage.removeItem("ref_by");
+
 location.href="index.html";
 }
 
