@@ -8,29 +8,38 @@
 
 <style>
 body{font-family:Arial;margin:0;background:#e5e7eb;padding-bottom:80px;}
-.header{position:fixed;top:10px;left:10px;right:10px;background:#fff;padding:10px;border-radius:20px;display:flex;justify-content:space-between;}
+
+.header{
+position:fixed;top:10px;left:10px;right:10px;
+background:#fff;padding:10px;border-radius:20px;
+display:flex;justify-content:space-between;
+}
+
 #userId{background:green;color:#fff;padding:6px 12px;border-radius:20px;font-size:12px;}
 #wallet{background:red;color:#fff;padding:6px 12px;border-radius:20px;font-size:12px;}
 
-.topMode{margin-top:70px;display:flex;justify-content:center;gap:10px;}
-.modeBtn{padding:10px 20px;border-radius:20px;color:#fff;cursor:pointer;}
-.m1{background:blue;}
-.m2{background:black;}
+.topBtns{margin-top:80px;display:flex;justify-content:space-around;}
+.topBtn{width:18%;padding:10px;border-radius:20px;color:#fff;text-align:center;font-size:12px;cursor:pointer;}
 
-.topBtns{margin-top:10px;display:flex;justify-content:space-around;}
-.topBtn{width:18%;padding:10px;border-radius:20px;color:#fff;text-align:center;font-size:12px;}
+.btn1{background:#6c5ce7;}
+.btn2{background:#00b894;}
+.btn3{background:#0984e3;}
+.btn4{background:#e17055;}
+.btn5{background:#111;}
 
 .game{display:none;}
 .active{display:block;}
 
 .container{margin:10px;background:#fff;padding:15px;border-radius:15px;padding-bottom:150px;}
+
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
 .box{background:#fff;padding:10px;border-radius:10px;text-align:center;border:1px solid #ddd;}
+
 input{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;}
 
 .bottom{position:fixed;bottom:0;width:100%;display:flex;}
 .total{width:50%;background:linear-gradient(to right,blue,red);color:#fff;text-align:center;padding:15px;}
-.submit{width:50%;background:green;color:#fff;text-align:center;padding:15px;cursor:pointer;}
+.submit{width:50%;background:green;color:#fff;text-align:center;padding:15px;font-weight:bold;cursor:pointer;}
 </style>
 </head>
 
@@ -41,16 +50,12 @@ input{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;}
 <div id="wallet">₹ 0</div>
 </div>
 
-<div class="topMode">
-<div class="modeBtn m1" onclick="setMode(1)">Mode 1</div>
-<div class="modeBtn m2" onclick="setMode(2)">Mode 2</div>
-</div>
-
 <div class="topBtns">
-<div class="topBtn" onclick="showGame('jodi')">JODI</div>
-<div class="topBtn" onclick="showGame('haruf')">HARUF</div>
-<div class="topBtn" onclick="showGame('crossing')">CROSSING</div>
-<div class="topBtn" onclick="showGame('copy')">COPY</div>
+<div class="topBtn btn1" onclick="showGame('jodi')">JODI</div>
+<div class="topBtn btn2" onclick="showGame('haruf')">HARUF</div>
+<div class="topBtn btn3" onclick="showGame('crossing')">CROSSING</div>
+<div class="topBtn btn4" onclick="showGame('copy')">COPY</div>
+<div class="topBtn btn5" onclick="window.location.href='play.html'">TYP/IMAGE</div>
 </div>
 
 <div id="jodi" class="game active container">
@@ -58,27 +63,32 @@ input{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;}
 </div>
 
 <div id="haruf" class="game container">
-<h3>Andar</h3>
+<h3>Single Andar</h3>
 <div class="grid" id="harufGrid1"></div>
-<h3>Bahar</h3>
+<h3>Single Bahar</h3>
 <div class="grid" id="harufGrid2"></div>
 </div>
 
 <div id="crossing" class="game container">
-<input id="num1" placeholder="1st number">
-<input id="num2" placeholder="2nd number">
-<input id="points" placeholder="Amount">
+<label>1ST NUMBER</label>
+<input id="num1">
+<label>2ND NUMBER</label>
+<input id="num2">
+<label>POINTS</label>
+<input id="points">
 <button onclick="generateCross()">SET</button>
-<div id="crossGrid"></div>
+<div id="crossGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;"></div>
 </div>
 
 <div id="copy" class="game container">
-<input id="digits" placeholder="Digits">
-<input id="amt" placeholder="Amount">
+<label>ENTER DIGIT</label>
+<input id="digits">
+<label>ENTER AMOUNT</label>
+<input id="amt">
 <button onclick="generateCopy()">ADD</button>
 
 <table id="table" border="1" width="100%">
-<tr><th>NUMBER</th><th>AMOUNT</th></tr>
+<tr><th>NUMBER</th><th>AMOUNT</th><th>DEL</th></tr>
 </table>
 </div>
 
@@ -89,29 +99,25 @@ input{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;}
 
 <script>
 
-let mode = 1;
-function setMode(m){ mode = m; }
-
-function checkAmount(val){
-val = Number(val)||0;
-if(mode===2 && val%10!==0){
-alert("Sirf 10,20,30 allowed");
-return false;
-}
-return true;
-}
-
-const client = supabase.createClient("https://katbdbzoufiblnnsoxkk.supabase.co","sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a");
+const client = supabase.createClient(
+"https://katbdbzoufiblnnsoxkk.supabase.co",
+"sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
+);
 
 const user = JSON.parse(localStorage.getItem("user"));
-document.getElementById("userId").innerText="ID: "+user.id;
+document.getElementById("userId").innerText = "ID: " + user.id;
 
-const market = localStorage.getItem("market") || "XXX";
+// ✅ MODE FROM HOME (hidden)
+let mode = Number(localStorage.getItem("mode")) || 1;
+if(mode !== 1 && mode !== 2){ mode = 1; }
 
-let dataArr=[], total=0;
+const market = localStorage.getItem("market") || "UNKNOWN";
+
+let dataArr = [];
+let total = 0;
 
 function updateTotal(){
-total=0;
+total = 0;
 dataArr.forEach(i=>total+=i.amount);
 document.getElementById("total").innerText="₹ "+total;
 }
@@ -119,6 +125,16 @@ document.getElementById("total").innerText="₹ "+total;
 function showGame(id){
 document.querySelectorAll(".game").forEach(g=>g.classList.remove("active"));
 document.getElementById(id).classList.add("active");
+}
+
+// ✅ AMOUNT RULE
+function checkAmount(val){
+val = Number(val)||0;
+if(mode===2 && val%10!==0){
+alert("Sirf 10,20,30 allowed");
+return false;
+}
+return true;
 }
 
 // JODI
@@ -149,7 +165,9 @@ updateTotal();
 }
 
 function generateCross(){
-let n1=num1.value,n2=num2.value,a=Number(points.value);
+let n1=num1.value.trim();
+let n2=num2.value.trim();
+let a=Number(points.value);
 
 if(!checkAmount(a)) return;
 
@@ -164,7 +182,8 @@ updateTotal();
 }
 
 function generateCopy(){
-let d=digits.value,a=Number(amt.value);
+let d=digits.value.trim();
+let a=Number(amt.value);
 
 if(!checkAmount(a)) return;
 
@@ -172,15 +191,15 @@ dataArr=[];
 
 let arr=d.match(/.{1,2}/g)||[];
 
-arr.forEach(n=>{
-if(n.length==1) n="0"+n;
-dataArr.push({number:n,amount:a});
+arr.forEach(num=>{
+if(num.length==1) num="0"+num;
+dataArr.push({number:num,amount:a});
 });
 
 updateTotal();
 }
 
-// SUBMIT (same system)
+// SUBMIT (same)
 async function submitAll(){
 
 if(dataArr.length===0){
@@ -219,6 +238,8 @@ dataArr=[];
 total=0;
 updateTotal();
 document.querySelectorAll("input").forEach(i=>i.value="");
+document.getElementById("table").innerHTML=`<tr><th>NUMBER</th><th>AMOUNT</th><th>DEL</th></tr>`;
+document.getElementById("crossGrid").innerHTML="";
 }
 
 </script>
