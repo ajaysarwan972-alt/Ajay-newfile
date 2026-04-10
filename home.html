@@ -48,9 +48,26 @@ body{
   cursor:pointer;
 }
 
+/* 🔥 TOP BUTTON */
+.topBtnFull{
+  margin-top:80px;
+  margin-left:10px;
+  margin-right:10px;
+  width:calc(100% - 20px);
+  background:#111;
+  color:#fff;
+  text-align:center;
+  padding:14px;
+  border-radius:15px;
+  font-weight:bold;
+  font-size:16px;
+  border:none;
+  cursor:pointer;
+}
+
 /* ACTION */
 .actionBar{
-  margin-top:90px;
+  margin-top:10px;
   display:flex;
   justify-content:space-around;
   padding:10px;
@@ -90,23 +107,9 @@ body{
   text-align:center;
 }
 
-.gameName{
-  font-size:18px;
-  font-weight:bold;
-}
-
-.gameNumber{
-  font-size:26px;
-  color:red;
-  font-weight:bold;
-  margin:5px 0;
-}
-
-.gameTime{
-  font-size:14px;
-  color:#1e73be;
-  margin-bottom:10px;
-}
+.gameName{font-size:18px;font-weight:bold;}
+.gameNumber{font-size:26px;color:red;font-weight:bold;margin:5px 0;}
+.gameTime{font-size:14px;color:#1e73be;margin-bottom:10px;}
 
 .status img{
   width:70px;
@@ -164,8 +167,12 @@ body{
 
 <div id="menuBtn" onclick="openMenu()">☰</div>
 <div id="userId">ID: 0000</div>
-
 <div id="wallet" onclick="goWallet()">₹ 0</div>
+
+<!-- 🔥 FULL WIDTH BUTTON -->
+<button class="topBtnFull" onclick="alert('Rate applied 🔥')">
+  10 ke 950 rate game
+</button>
 
 <div class="actionBar">
   <div class="actionBtn add" onclick="go('deposit.html')">Add Money</div>
@@ -177,13 +184,9 @@ body{
 
 <a class="whatsapp" href="https://wa.me/" target="_blank">💬</a>
 
-<!-- ✅ UPDATED NAV -->
 <div id="bottomNav">
   <div class="navBtn active">Home</div>
-
-  <!-- 🔥 PLAY INDIA BUTTON -->
   <div class="navBtn" onclick="window.location.href='india.html'">PLAY INDIA</div>
-
   <div class="navBtn" onclick="goWallet()">Wallet</div>
   <div class="navBtn">Profile</div>
 </div>
@@ -297,11 +300,6 @@ function shareApp(){
 
 function goWallet(){
   window.location.href = "wallet.html";
-}
-
-function logout(){
-  localStorage.removeItem("user");
-  window.location.href = "index.html";
 }
 
 loadWallet();
