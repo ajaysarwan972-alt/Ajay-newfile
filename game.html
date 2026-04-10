@@ -19,7 +19,24 @@ z-index:999;
 #userId{background:green;color:#fff;padding:6px 12px;border-radius:20px;font-size:12px;}
 #wallet{background:red;color:#fff;padding:6px 12px;border-radius:20px;font-size:12px;}
 
-.topBtns{margin-top:80px;display:flex;justify-content:space-around;}
+.topMode{
+margin-top:70px;
+display:flex;
+justify-content:center;
+gap:10px;
+}
+
+.modeBtn{
+padding:10px 20px;
+border-radius:20px;
+color:#fff;
+cursor:pointer;
+}
+
+.m1{background:blue;}
+.m2{background:black;}
+
+.topBtns{margin-top:10px;display:flex;justify-content:space-around;}
 .topBtn{width:18%;padding:10px;border-radius:20px;color:#fff;text-align:center;cursor:pointer;font-size:12px;}
 .btn1{background:#6c5ce7;}
 .btn2{background:#00b894;}
@@ -57,6 +74,12 @@ cursor:pointer;
 <div class="header">
 <div id="userId">ID: 0</div>
 <div id="wallet">₹ 0</div>
+</div>
+
+<!-- 🔥 MODE BUTTON -->
+<div class="topMode">
+<div class="modeBtn m1" onclick="setMode(1)">1 ke 90</div>
+<div class="modeBtn m2" onclick="setMode(2)">10 ke 950</div>
 </div>
 
 <div class="topBtns">
@@ -108,6 +131,13 @@ cursor:pointer;
 
 <script>
 
+let mode = 1; // 🔥 default mode
+
+function setMode(m){
+mode = m;
+alert(m === 1 ? "Mode 1 (1 ke 90)" : "Mode 2 (10 ke 950)");
+}
+
 const client = supabase.createClient(
 "https://katbdbzoufiblnnsoxkk.supabase.co",
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
@@ -119,11 +149,6 @@ document.getElementById("userId").innerText = "ID: " + user.id;
 loadUser();
 
 async function loadUser(){
-if(!user){
-alert("Login again");
-return;
-}
-
 let {data} = await client
 .from("login")
 .select("balance")
@@ -168,15 +193,10 @@ if(val>0){dataArr.push({number:num,amount:val});}
 updateTotal();
 }
 
-let lastCrossInput="";
 function generateCross(){
 let n1=num1.value.trim();
 let n2=num2.value.trim();
 let a=Number(points.value);
-
-let current=n1+"|"+n2+"|"+a;
-if(current===lastCrossInput) return;
-lastCrossInput=current;
 
 crossGrid.innerHTML="";
 dataArr=[];
@@ -184,25 +204,16 @@ dataArr=[];
 for(let i of n1){
 for(let j of n2){
 let pair=i+j;
-
-let exist=dataArr.find(x=>x.number===pair);
-if(exist){exist.amount+=a;}
-else{dataArr.push({number:pair,amount:a});}
-
+dataArr.push({number:pair,amount:a});
 crossGrid.innerHTML+=`<div class="box">${pair}<br>₹${a}</div>`;
 }}
 
 updateTotal();
 }
 
-let lastCopyInput="";
 function generateCopy(){
 let d=digits.value.trim();
 let a=Number(amt.value);
-
-let current=d+"|"+a;
-if(current===lastCopyInput) return;
-lastCopyInput=current;
 
 table.innerHTML=`<tr><th>NUMBER</th><th>AMOUNT</th><th>DEL</th></tr>`;
 dataArr=[];
@@ -211,18 +222,14 @@ let arr=d.match(/.{1,2}/g);
 
 arr.forEach(num=>{
 if(num.length==1) num="0"+num;
-
-let exist=dataArr.find(x=>x.number===num);
-if(exist){exist.amount+=a;}
-else{dataArr.push({number:num,amount:a});}
-
+dataArr.push({number:num,amount:a});
 table.innerHTML+=`<tr><td>${num}</td><td>${a}</td><td>X</td></tr>`;
 });
 
 updateTotal();
 }
 
-// 🔥 ONLY CHANGE (₹5 MULTIPLE CHECK)
+// 🔥 FINAL SUBMIT
 async function submitAll(){
 
 if(dataArr.length===0){
@@ -230,10 +237,13 @@ alert("Kuch add karo pehle");
 return;
 }
 
+// 🔥 MODE 2 VALIDATION
+if(mode === 2){
 for(let i of dataArr){
-if(i.amount % 5 !== 0){
-alert("Amount 5 ke multiple me hona chahiye (5,10,15...)");
+if(i.amount % 10 !== 0){
+alert("Sirf 10 ke multiple allowed");
 return;
+}
 }
 }
 
@@ -244,7 +254,7 @@ let {data:userData} = await client
 .single();
 
 if(userData.balance < total){
-alert("YOUR BALANCE IS LOW GAME CANCEL❌");
+alert("LOW BALANCE ❌");
 return;
 }
 
@@ -252,24 +262,30 @@ await client.from("login")
 .update({balance: userData.balance - total})
 .eq("id", user.id);
 
+// 🔥 COLUMN SWITCH
+let column = (mode === 1) ? "close" : "close2";
+
 await client.from("history")
 .insert({
 user_id: user.id,
 market: market,
 data: dataArr,
 total: total,
+column: column,
+mode: mode,
 created_at: new Date()
 });
 
-alert("GAME OK✅");
+alert("GAME OK ✅");
+
 await loadUser();
 
 dataArr=[];
 total=0;
 updateTotal();
 document.querySelectorAll("input").forEach(i=>i.value="");
-document.getElementById("table").innerHTML=`<tr><th>NUMBER</th><th>AMOUNT</th><th>DEL</th></tr>`;
-document.getElementById("crossGrid").innerHTML="";
+table.innerHTML=`<tr><th>NUMBER</th><th>AMOUNT</th><th>DEL</th></tr>`;
+crossGrid.innerHTML="";
 }
 
 </script>
