@@ -8,29 +8,29 @@
 
 <style>
 body{font-family:Arial;margin:0;background:#e5e7eb;padding-bottom:80px;}
-.header{position:fixed;top:10px;left:10px;right:10px;background:#fff;padding:10px;border-radius:20px;display:flex;justify-content:space-between;z-index:999;}
+.header{position:fixed;top:10px;left:10px;right:10px;background:#fff;padding:10px;border-radius:20px;display:flex;justify-content:space-between;}
 #userId{background:green;color:#fff;padding:6px 12px;border-radius:20px;font-size:12px;}
 #wallet{background:red;color:#fff;padding:6px 12px;border-radius:20px;font-size:12px;}
+
 .topMode{margin-top:70px;display:flex;justify-content:center;gap:10px;}
 .modeBtn{padding:10px 20px;border-radius:20px;color:#fff;cursor:pointer;}
 .m1{background:blue;}
 .m2{background:black;}
+
 .topBtns{margin-top:10px;display:flex;justify-content:space-around;}
-.topBtn{width:18%;padding:10px;border-radius:20px;color:#fff;text-align:center;cursor:pointer;font-size:12px;}
-.btn1{background:#6c5ce7;}
-.btn2{background:#00b894;}
-.btn3{background:#0984e3;}
-.btn4{background:#e17055;}
-.btn5{background:#111;}
+.topBtn{width:18%;padding:10px;border-radius:20px;color:#fff;text-align:center;font-size:12px;}
+
 .game{display:none;}
 .active{display:block;}
+
 .container{margin:10px;background:#fff;padding:15px;border-radius:15px;padding-bottom:150px;}
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
 .box{background:#fff;padding:10px;border-radius:10px;text-align:center;border:1px solid #ddd;}
 input{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;}
+
 .bottom{position:fixed;bottom:0;width:100%;display:flex;}
 .total{width:50%;background:linear-gradient(to right,blue,red);color:#fff;text-align:center;padding:15px;}
-.submit{width:50%;background:green;color:#fff;text-align:center;padding:15px;font-weight:bold;font-size:16px;cursor:pointer;}
+.submit{width:50%;background:green;color:#fff;text-align:center;padding:15px;cursor:pointer;}
 </style>
 </head>
 
@@ -42,16 +42,15 @@ input{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;}
 </div>
 
 <div class="topMode">
-<div class="modeBtn m1" onclick="setMode(1)">1 ke 90</div>
-<div class="modeBtn m2" onclick="setMode(2)">10 ke 950</div>
+<div class="modeBtn m1" onclick="setMode(1)">Mode 1</div>
+<div class="modeBtn m2" onclick="setMode(2)">Mode 2</div>
 </div>
 
 <div class="topBtns">
-<div class="topBtn btn1" onclick="showGame('jodi')">JODI</div>
-<div class="topBtn btn2" onclick="showGame('haruf')">HARUF</div>
-<div class="topBtn btn3" onclick="showGame('crossing')">CROSSING</div>
-<div class="topBtn btn4" onclick="showGame('copy')">COPY</div>
-<div class="topBtn btn5" onclick="window.location.href='play.html'">TYP/IMAGE</div>
+<div class="topBtn" onclick="showGame('jodi')">JODI</div>
+<div class="topBtn" onclick="showGame('haruf')">HARUF</div>
+<div class="topBtn" onclick="showGame('crossing')">CROSSING</div>
+<div class="topBtn" onclick="showGame('copy')">COPY</div>
 </div>
 
 <div id="jodi" class="game active container">
@@ -59,32 +58,27 @@ input{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;}
 </div>
 
 <div id="haruf" class="game container">
-<h3>Single Andar</h3>
+<h3>Andar</h3>
 <div class="grid" id="harufGrid1"></div>
-<h3>Single Bahar</h3>
+<h3>Bahar</h3>
 <div class="grid" id="harufGrid2"></div>
 </div>
 
 <div id="crossing" class="game container">
-<label>1ST NUMBER</label>
-<input id="num1">
-<label>2ND NUMBER</label>
-<input id="num2">
-<label>POINTS</label>
-<input id="points">
+<input id="num1" placeholder="1st number">
+<input id="num2" placeholder="2nd number">
+<input id="points" placeholder="Amount">
 <button onclick="generateCross()">SET</button>
-<div id="crossGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;"></div>
+<div id="crossGrid"></div>
 </div>
 
 <div id="copy" class="game container">
-<label>ENTER DIGIT</label>
-<input id="digits">
-<label>ENTER AMOUNT</label>
-<input id="amt">
+<input id="digits" placeholder="Digits">
+<input id="amt" placeholder="Amount">
 <button onclick="generateCopy()">ADD</button>
 
 <table id="table" border="1" width="100%">
-<tr><th>NUMBER</th><th>AMOUNT</th><th>DEL</th></tr>
+<tr><th>NUMBER</th><th>AMOUNT</th></tr>
 </table>
 </div>
 
@@ -96,41 +90,28 @@ input{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;}
 <script>
 
 let mode = 1;
+function setMode(m){ mode = m; }
 
-function setMode(m){
-mode = m;
-alert(m === 1 ? "Mode 1 (1 ke 90)" : "Mode 2 (10 ke 950)");
+function checkAmount(val){
+val = Number(val)||0;
+if(mode===2 && val%10!==0){
+alert("Sirf 10,20,30 allowed");
+return false;
+}
+return true;
 }
 
-const client = supabase.createClient(
-"https://katbdbzoufiblnnsoxkk.supabase.co",
-"sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
-);
+const client = supabase.createClient("https://katbdbzoufiblnnsoxkk.supabase.co","sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a");
 
 const user = JSON.parse(localStorage.getItem("user"));
-document.getElementById("userId").innerText = "ID: " + user.id;
+document.getElementById("userId").innerText="ID: "+user.id;
 
-loadUser();
+const market = localStorage.getItem("market") || "XXX";
 
-async function loadUser(){
-let {data} = await client
-.from("login")
-.select("balance")
-.eq("id", user.id)
-.single();
-
-if(data){
-document.getElementById("wallet").innerText = "₹ " + data.balance;
-}
-}
-
-const market = localStorage.getItem("market") || "UNKNOWN";
-
-let dataArr = [];
-let total = 0;
+let dataArr=[], total=0;
 
 function updateTotal(){
-total = 0;
+total=0;
 dataArr.forEach(i=>total+=i.amount);
 document.getElementById("total").innerText="₹ "+total;
 }
@@ -140,74 +121,71 @@ document.querySelectorAll(".game").forEach(g=>g.classList.remove("active"));
 document.getElementById(id).classList.add("active");
 }
 
+// JODI
 for(let i=0;i<100;i++){
 let num=i.toString().padStart(2,'0');
 jodiGrid.innerHTML+=`<div class="box">${num}<input oninput="add('${num}',this.value)"></div>`;
 }
 
+// HARUF
 for(let i=0;i<10;i++){
 harufGrid1.innerHTML+=`<div class="box">${i}<input oninput="add('A${i}',this.value)"></div>`;
 harufGrid2.innerHTML+=`<div class="box">${i}<input oninput="add('B${i}',this.value)"></div>`;
 }
 
 function add(num,val){
+
+if(!checkAmount(val)) return;
+
 val=Number(val)||0;
+
 dataArr=dataArr.filter(x=>x.number!==num);
-if(val>0){dataArr.push({number:num,amount:val});}
+
+if(val>0){
+dataArr.push({number:num,amount:val});
+}
+
 updateTotal();
 }
 
 function generateCross(){
-let n1=num1.value.trim();
-let n2=num2.value.trim();
-let a=Number(points.value);
+let n1=num1.value,n2=num2.value,a=Number(points.value);
 
-crossGrid.innerHTML="";
+if(!checkAmount(a)) return;
+
 dataArr=[];
 
 for(let i of n1){
 for(let j of n2){
-let pair=i+j;
-dataArr.push({number:pair,amount:a});
-crossGrid.innerHTML+=`<div class="box">${pair}<br>₹${a}</div>`;
+dataArr.push({number:i+j,amount:a});
 }}
 
 updateTotal();
 }
 
 function generateCopy(){
-let d=digits.value.trim();
-let a=Number(amt.value);
+let d=digits.value,a=Number(amt.value);
 
-table.innerHTML=`<tr><th>NUMBER</th><th>AMOUNT</th><th>DEL</th></tr>`;
+if(!checkAmount(a)) return;
+
 dataArr=[];
 
-let arr=d.match(/.{1,2}/g) || [];
+let arr=d.match(/.{1,2}/g)||[];
 
-arr.forEach(num=>{
-if(num.length==1) num="0"+num;
-dataArr.push({number:num,amount:a});
-table.innerHTML+=`<tr><td>${num}</td><td>${a}</td><td>X</td></tr>`;
+arr.forEach(n=>{
+if(n.length==1) n="0"+n;
+dataArr.push({number:n,amount:a});
 });
 
 updateTotal();
 }
 
-// ✅ SAME SYSTEM SUBMIT (JSON)
+// SUBMIT (same system)
 async function submitAll(){
 
 if(dataArr.length===0){
 alert("Kuch add karo pehle");
 return;
-}
-
-if(mode === 2){
-for(let i of dataArr){
-if(i.amount % 10 !== 0){
-alert("Sirf 10 ke multiple allowed");
-return;
-}
-}
 }
 
 let {data:userData} = await client
@@ -217,7 +195,7 @@ let {data:userData} = await client
 .single();
 
 if(userData.balance < total){
-alert("LOW BALANCE ❌");
+alert("LOW BALANCE");
 return;
 }
 
@@ -225,33 +203,22 @@ await client.from("login")
 .update({balance: userData.balance - total})
 .eq("id", user.id);
 
-// ✅ OLD JSON SAVE (NO CHANGE)
-let {error} = await client
-.from("history")
+await client.from("history")
 .insert([{
-user_id: user.id,
-market: market,
-data: dataArr,
-total: total,
-mode: mode
+user_id:user.id,
+market:market,
+data:dataArr,
+total:total,
+mode:mode,
+created_at:new Date()
 }]);
 
-if(error){
-console.log(error);
-alert("Error: " + error.message);
-return;
-}
-
-alert("GAME OK ✅");
-
-await loadUser();
+alert("GAME OK");
 
 dataArr=[];
 total=0;
 updateTotal();
 document.querySelectorAll("input").forEach(i=>i.value="");
-table.innerHTML=`<tr><th>NUMBER</th><th>AMOUNT</th><th>DEL</th></tr>`;
-crossGrid.innerHTML="";
 }
 
 </script>
