@@ -48,7 +48,7 @@ body{
   cursor:pointer;
 }
 
-/* 🔥 TOP BUTTON */
+/* TOP BUTTON */
 .topBtnFull{
   margin-top:80px;
   margin-left:10px;
@@ -116,22 +116,6 @@ body{
   margin-top:10px;
 }
 
-/* WHATSAPP */
-.whatsapp{
-  position:fixed;
-  bottom:80px;
-  right:15px;
-  width:55px;
-  height:55px;
-  background:#25D366;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:white;
-  font-size:28px;
-}
-
 /* NAV */
 #bottomNav{
   position:fixed;
@@ -169,9 +153,9 @@ body{
 <div id="userId">ID: 0000</div>
 <div id="wallet" onclick="goWallet()">₹ 0</div>
 
-<!-- ✅ FIXED BUTTON -->
-<button class="topBtnFull" onclick="window.location.href='home2.html'">
-  10 ke 950 rate game
+<!-- ✅ MODE 2 BUTTON -->
+<button class="topBtnFull" onclick="openMode2()">
+  10 ke 950
 </button>
 
 <div class="actionBar">
@@ -181,8 +165,6 @@ body{
 </div>
 
 <div class="container" id="container"></div>
-
-<a class="whatsapp" href="https://wa.me/" target="_blank">💬</a>
 
 <div id="bottomNav">
   <div class="navBtn active">Home</div>
@@ -276,6 +258,7 @@ async function loadButtons(){
     if(isOpen){
       btn.onclick = () => {
         localStorage.setItem("market", item.name);
+        localStorage.setItem("gameMode", "simple"); // ✅ Mode 1
         window.location.href = "game.html";
       };
     } else {
@@ -284,6 +267,12 @@ async function loadButtons(){
 
     container.appendChild(btn);
   });
+}
+
+/* 🔥 MODE 2 */
+function openMode2(){
+  localStorage.setItem("gameMode", "10x");
+  window.location.href = "game.html";
 }
 
 function go(page){
@@ -309,4 +298,4 @@ setInterval(()=>{
 
 <script src="common.js"></script>
 </body>
-  </html>
+</html>
