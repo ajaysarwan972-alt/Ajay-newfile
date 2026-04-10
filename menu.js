@@ -1,10 +1,12 @@
+<script>
+
 // 🔥 MENU DATA
 const MENU_ITEMS = [
 {name:"🏠 Home", link:"home.html"},
 {name:"👤 Profile", link:"profile.html"},
 {name:"💳 UPI Details", link:"deposit.html"},
 {name:"🏦 Bank Details", link:"withdraw.html"},
-{name:"📜 History", link:"history_toggle"}, // ✅ FIXED
+{name:"📜 History", link:"history_toggle"},
 
 {name:"📊 Result", link:"market.html"},
 {name:"💰 Winning", link:"userwining.html"},
@@ -13,7 +15,7 @@ const MENU_ITEMS = [
 {name:"🚪 Logout", link:"logout"}
 ];
 
-// 🔥 MENU + OVERLAY CREATE
+// 🔥 MENU UI
 document.body.insertAdjacentHTML("beforeend", `
 <div id="sideMenu" style="
 position:fixed;
@@ -63,30 +65,30 @@ ${item.name}
 </div>
 `;
 
-// ✅ History ke turant niche dropdown
+// 🔥 HISTORY DROPDOWN
 if(item.link === "history_toggle"){
 html += `
 <div id="historyDropdown" style="display:none; padding-left:10px;">
     
-    <div style="
-    padding:12px;
-    margin-top:5px;
-    background:#e6e6e6;
-    border-radius:10px;
-    cursor:pointer;
-    " onclick="handleMenu('userhistory.html')">
-    📄 History
-    </div>
+<div style="padding:12px;margin-top:5px;background:#e6e6e6;border-radius:10px;"
+onclick="handleMenu('userhistory.html?mode=1')">
+1 ke 90 History
+</div>
 
-    <div style="
-    padding:12px;
-    margin-top:5px;
-    background:#e6e6e6;
-    border-radius:10px;
-    cursor:pointer;
-    " onclick="handleMenu('typinghistory.html')">
-    🖼️ Typing/Image
-    </div>
+<div style="padding:12px;margin-top:5px;background:#e6e6e6;border-radius:10px;"
+onclick="handleMenu('userhistory.html?mode=2')">
+10 ke 950 History
+</div>
+
+<div style="padding:12px;margin-top:5px;background:#e6e6e6;border-radius:10px;"
+onclick="handleMenu('typinghistory.html')">
+Typing/Image
+</div>
+
+<div style="padding:12px;margin-top:5px;background:#e6e6e6;border-radius:10px;"
+onclick="handleMenu('indiahistory.html')">
+PlayIndia History
+</div>
 
 </div>
 `;
@@ -110,13 +112,13 @@ document.getElementById("overlay").style.display = "none";
 // 🔥 DROPDOWN
 function toggleHistory(){
 let box = document.getElementById("historyDropdown");
-box.style.display = (box.style.display === "none") ? "block" : "none";
+box.style.display = (box.style.display === "block") ? "none" : "block";
 }
 
-// 🔥 MENU CLICK
+// 🔥 CLICK HANDLE
 function handleMenu(link){
 
-// ✅ History click → dropdown open
+// History open
 if(link === "history_toggle"){
 toggleHistory();
 return;
@@ -124,15 +126,20 @@ return;
 
 // Game Rates
 if(link === "#"){
-alert("RATE LIST:-*\n\n• जोड़ी रेट: 1 ke 90, 10 ke 950\n\n• हर्फ़ रेट: 10 ke 90, 100 ke 950");
+alert("RATE LIST:-\n\n• 1 ke 90\n• 10 ke 950");
 return;
 }
 
-// logout
+// Logout
 if(link === "logout"){
 localStorage.removeItem("user");
 window.location.href = "index.html";
-} else {
+return;
+}
+
+// Normal redirect
 window.location.href = link;
+
 }
-}
+
+</script>
