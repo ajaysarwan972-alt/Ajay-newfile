@@ -289,14 +289,12 @@ function go(page){
   window.location.href = page;
 }
 
-/* ✅ SIRF YAHI CHANGE KIYA */
+/* ✅ SIRF YAHI FINAL CHANGE */
 function shareApp(){
-  let link = "referral.html?ref=" + user.id;
-
   navigator.share({
     title: "My App",
     text: "Join now",
-    url: link
+    url: "referral.html"
   });
 }
 
