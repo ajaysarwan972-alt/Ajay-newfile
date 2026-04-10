@@ -1,8 +1,8 @@
 <script>
 
-// 🔥 MENU DATA
+// 🔥 MENU ITEMS
 const MENU_ITEMS = [
-{name:"🏠 Home", link:"home.html"},
+{name:"🏠 Home", link:"home_mode1"},  // 👈 yaha change kiya
 {name:"👤 Profile", link:"profile.html"},
 {name:"💳 UPI Details", link:"deposit.html"},
 {name:"🏦 Bank Details", link:"withdraw.html"},
@@ -27,11 +27,9 @@ background:#fff;
 z-index:9999;
 padding:15px;
 transition:0.3s;
-border-top-right-radius:20px;
-border-bottom-right-radius:20px;
 overflow:auto;
 ">
-<h2 style="margin-bottom:15px;">Menu</h2>
+<h2>Menu</h2>
 <div id="menuItems"></div>
 </div>
 
@@ -47,7 +45,7 @@ z-index:9998;
 "></div>
 `);
 
-// 🔥 MENU LOAD
+// 🔥 BUILD MENU
 let html = "";
 
 MENU_ITEMS.forEach(item=>{
@@ -57,9 +55,9 @@ html += `
 padding:15px;
 margin-top:10px;
 background:#f2f2f2;
-border-radius:12px;
-font-weight:bold;
+border-radius:10px;
 cursor:pointer;
+font-weight:bold;
 " onclick="handleMenu('${item.link}')">
 ${item.name}
 </div>
@@ -69,24 +67,24 @@ ${item.name}
 if(item.link === "history_toggle"){
 html += `
 <div id="historyDropdown" style="display:none; padding-left:10px;">
-    
-<div style="padding:12px;margin-top:5px;background:#e6e6e6;border-radius:10px;"
-onclick="handleMenu('userhistory.html?mode=1')">
+
+<div style="padding:12px;margin-top:5px;background:#e6e6e6;border-radius:8px;"
+onclick="window.location.href='userhistory.html?mode=1'">
 1 ke 90 History
 </div>
 
-<div style="padding:12px;margin-top:5px;background:#e6e6e6;border-radius:10px;"
-onclick="handleMenu('userhistory.html?mode=2')">
+<div style="padding:12px;margin-top:5px;background:#e6e6e6;border-radius:8px;"
+onclick="window.location.href='userhistory.html?mode=2'">
 10 ke 950 History
 </div>
 
-<div style="padding:12px;margin-top:5px;background:#e6e6e6;border-radius:10px;"
-onclick="handleMenu('typinghistory.html')">
+<div style="padding:12px;margin-top:5px;background:#e6e6e6;border-radius:8px;"
+onclick="window.location.href='typinghistory.html'">
 Typing/Image
 </div>
 
-<div style="padding:12px;margin-top:5px;background:#e6e6e6;border-radius:10px;"
-onclick="handleMenu('indiahistory.html')">
+<div style="padding:12px;margin-top:5px;background:#e6e6e6;border-radius:8px;"
+onclick="window.location.href='indiahistory.html'">
 PlayIndia History
 </div>
 
@@ -100,44 +98,45 @@ document.getElementById("menuItems").innerHTML = html;
 
 // 🔥 FUNCTIONS
 function openMenu(){
-document.getElementById("sideMenu").style.left = "0";
-document.getElementById("overlay").style.display = "block";
+document.getElementById("sideMenu").style.left="0";
+document.getElementById("overlay").style.display="block";
 }
 
 function closeMenu(){
-document.getElementById("sideMenu").style.left = "-100%";
-document.getElementById("overlay").style.display = "none";
-}
-
-// 🔥 DROPDOWN
-function toggleHistory(){
-let box = document.getElementById("historyDropdown");
-box.style.display = (box.style.display === "block") ? "none" : "block";
+document.getElementById("sideMenu").style.left="-100%";
+document.getElementById("overlay").style.display="none";
 }
 
 // 🔥 CLICK HANDLE
 function handleMenu(link){
 
-// History open
+// ✅ HOME MODE 1
+if(link === "home_mode1"){
+window.location.href = "home.html?mode=1";
+return;
+}
+
+// 🔥 HISTORY
 if(link === "history_toggle"){
-toggleHistory();
+let box = document.getElementById("historyDropdown");
+box.style.display = box.style.display === "block" ? "none" : "block";
 return;
 }
 
-// Game Rates
+// GAME RATES
 if(link === "#"){
-alert("RATE LIST:-\n\n• 1 ke 90\n• 10 ke 950");
+alert("1 ke 90 | 10 ke 950");
 return;
 }
 
-// Logout
+// LOGOUT
 if(link === "logout"){
 localStorage.removeItem("user");
-window.location.href = "index.html";
+window.location.href="index.html";
 return;
 }
 
-// Normal redirect
+// NORMAL
 window.location.href = link;
 
 }
