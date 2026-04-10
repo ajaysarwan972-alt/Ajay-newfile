@@ -1,13 +1,13 @@
-<script>
+// 🔥 PAGE LOAD KE BAAD RUN
+window.onload = function(){
 
-// 🔥 MENU ITEMS
+// 🔥 MENU LIST
 const MENU_ITEMS = [
-{name:"🏠 Home", link:"home_mode1"},  // 👈 yaha change kiya
+{name:"🏠 Home", link:"home.html?mode=1"},
 {name:"👤 Profile", link:"profile.html"},
 {name:"💳 UPI Details", link:"deposit.html"},
 {name:"🏦 Bank Details", link:"withdraw.html"},
-{name:"📜 History", link:"history_toggle"},
-
+{name:"📜 History", link:"history"},
 {name:"📊 Result", link:"market.html"},
 {name:"💰 Winning", link:"userwining.html"},
 {name:"📊 Game Rates", link:"#"},
@@ -33,7 +33,7 @@ overflow:auto;
 <div id="menuItems"></div>
 </div>
 
-<div id="overlay" onclick="closeMenu()" style="
+<div id="overlay" style="
 position:fixed;
 top:0;
 left:0;
@@ -45,46 +45,42 @@ z-index:9998;
 "></div>
 `);
 
-// 🔥 BUILD MENU
+// 🔥 MENU BUILD
 let html = "";
 
-MENU_ITEMS.forEach(item=>{
+MENU_ITEMS.forEach(item => {
 
 html += `
-<div style="
+<div class="menuBtn" data-link="${item.link}" style="
 padding:15px;
 margin-top:10px;
 background:#f2f2f2;
 border-radius:10px;
 cursor:pointer;
 font-weight:bold;
-" onclick="handleMenu('${item.link}')">
+">
 ${item.name}
 </div>
 `;
 
 // 🔥 HISTORY DROPDOWN
-if(item.link === "history_toggle"){
+if(item.link === "history"){
 html += `
-<div id="historyDropdown" style="display:none; padding-left:10px;">
+<div id="historyBox" style="display:none; padding-left:10px;">
 
-<div style="padding:12px;margin-top:5px;background:#e6e6e6;border-radius:8px;"
-onclick="window.location.href='userhistory.html?mode=1'">
+<div class="menuBtn" data-link="mode1" style="padding:10px;margin-top:5px;background:#ddd;border-radius:8px;">
 1 ke 90 History
 </div>
 
-<div style="padding:12px;margin-top:5px;background:#e6e6e6;border-radius:8px;"
-onclick="window.location.href='userhistory.html?mode=2'">
+<div class="menuBtn" data-link="mode2" style="padding:10px;margin-top:5px;background:#ddd;border-radius:8px;">
 10 ke 950 History
 </div>
 
-<div style="padding:12px;margin-top:5px;background:#e6e6e6;border-radius:8px;"
-onclick="window.location.href='typinghistory.html'">
+<div class="menuBtn" data-link="typinghistory.html" style="padding:10px;margin-top:5px;background:#ddd;border-radius:8px;">
 Typing/Image
 </div>
 
-<div style="padding:12px;margin-top:5px;background:#e6e6e6;border-radius:8px;"
-onclick="window.location.href='indiahistory.html'">
+<div class="menuBtn" data-link="indiahistory.html" style="padding:10px;margin-top:5px;background:#ddd;border-radius:8px;">
 PlayIndia History
 </div>
 
@@ -96,49 +92,62 @@ PlayIndia History
 
 document.getElementById("menuItems").innerHTML = html;
 
-// 🔥 FUNCTIONS
-function openMenu(){
-document.getElementById("sideMenu").style.left="0";
-document.getElementById("overlay").style.display="block";
-}
+// 🔥 CLICK HANDLE (MAIN FIX)
+document.querySelectorAll(".menuBtn").forEach(btn=>{
+btn.onclick = function(){
 
-function closeMenu(){
-document.getElementById("sideMenu").style.left="-100%";
-document.getElementById("overlay").style.display="none";
-}
+let link = this.getAttribute("data-link");
 
-// 🔥 CLICK HANDLE
-function handleMenu(link){
-
-// ✅ HOME MODE 1
-if(link === "home_mode1"){
-window.location.href = "home.html?mode=1";
-return;
-}
-
-// 🔥 HISTORY
-if(link === "history_toggle"){
-let box = document.getElementById("historyDropdown");
+// 🔥 HISTORY TOGGLE
+if(link === "history"){
+let box = document.getElementById("historyBox");
 box.style.display = box.style.display === "block" ? "none" : "block";
 return;
 }
 
-// GAME RATES
+// 🔥 MODE 1
+if(link === "mode1"){
+window.location.href = "userhistory.html?mode=1";
+return;
+}
+
+// 🔥 MODE 2
+if(link === "mode2"){
+window.location.href = "userhistory.html?mode=2";
+return;
+}
+
+// 🔥 GAME RATE
 if(link === "#"){
 alert("1 ke 90 | 10 ke 950");
 return;
 }
 
-// LOGOUT
+// 🔥 LOGOUT
 if(link === "logout"){
 localStorage.removeItem("user");
-window.location.href="index.html";
+window.location.href = "index.html";
 return;
 }
 
-// NORMAL
+// 🔥 NORMAL LINK
 window.location.href = link;
 
+};
+});
+
+// 🔥 OPEN MENU
+window.openMenu = function(){
+document.getElementById("sideMenu").style.left = "0";
+document.getElementById("overlay").style.display = "block";
 }
 
-</script>
+// 🔥 CLOSE MENU
+window.closeMenu = function(){
+document.getElementById("sideMenu").style.left = "-100%";
+document.getElementById("overlay").style.display = "none";
+}
+
+document.getElementById("overlay").onclick = closeMenu;
+
+};
