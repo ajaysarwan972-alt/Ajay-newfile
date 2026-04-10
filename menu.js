@@ -1,9 +1,8 @@
-// 🔥 PAGE LOAD KE BAAD RUN
+// 🔥 LOAD KE BAAD RUN
 window.onload = function(){
 
-// 🔥 MENU LIST
 const MENU_ITEMS = [
-{name:"🏠 Home", link:"home.html?mode=1"},
+{name:"🏠 Home", link:"home"},
 {name:"👤 Profile", link:"profile.html"},
 {name:"💳 UPI Details", link:"deposit.html"},
 {name:"🏦 Bank Details", link:"withdraw.html"},
@@ -15,7 +14,7 @@ const MENU_ITEMS = [
 {name:"🚪 Logout", link:"logout"}
 ];
 
-// 🔥 MENU UI
+// 🔥 UI CREATE
 document.body.insertAdjacentHTML("beforeend", `
 <div id="sideMenu" style="
 position:fixed;
@@ -92,13 +91,19 @@ PlayIndia History
 
 document.getElementById("menuItems").innerHTML = html;
 
-// 🔥 CLICK HANDLE (MAIN FIX)
+// 🔥 CLICK SYSTEM (MAIN FIX)
 document.querySelectorAll(".menuBtn").forEach(btn=>{
 btn.onclick = function(){
 
 let link = this.getAttribute("data-link");
 
-// 🔥 HISTORY TOGGLE
+// ✅ HOME MODE 1
+if(link === "home"){
+window.location.href = "home.html?mode=1";
+return;
+}
+
+// 🔥 HISTORY OPEN
 if(link === "history"){
 let box = document.getElementById("historyBox");
 box.style.display = box.style.display === "block" ? "none" : "block";
