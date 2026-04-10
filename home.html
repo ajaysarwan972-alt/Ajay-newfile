@@ -43,7 +43,7 @@ body{
   font-weight:bold;
 }
 
-/* BUTTON */
+/* TOP BUTTON */
 .topBtnFull{
   margin-top:80px;
   margin-left:10px;
@@ -76,15 +76,15 @@ body{
 .withdraw{background:red;}
 .share{background:#6c5ce7;}
 
+/* GRID FIX */
 .container{
-  display:flex;
-  flex-wrap:wrap;
-  padding:10px;
+  display:grid;
+  grid-template-columns: repeat(2, 1fr);
   gap:10px;
+  padding:10px;
 }
 
 .btn{
-  width:48%;
   background:#fff;
   border:3px solid green;
   border-radius:15px;
@@ -92,10 +92,19 @@ body{
   text-align:center;
 }
 
-.gameNumber{color:red;font-size:24px;font-weight:bold;}
-.gameTime{color:#1e73be;}
+.gameNumber{
+  color:red;
+  font-size:22px;
+  font-weight:bold;
+}
 
-.status img{width:60px;}
+.gameTime{
+  color:#1e73be;
+}
+
+.status img{
+  width:60px;
+}
 </style>
 </head>
 
@@ -125,7 +134,7 @@ const client = supabase.createClient(
   "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
-/* ✅ MODE BUTTON TEXT */
+/* MODE BUTTON */
 function setModeBtn(){
   let mode = localStorage.getItem("gameMode");
 
@@ -138,7 +147,7 @@ function setModeBtn(){
   }
 }
 
-/* ✅ MODE CHANGE */
+/* MODE CHANGE */
 function changeMode(){
   let mode = localStorage.getItem("gameMode");
 
@@ -165,15 +174,28 @@ async function loadWallet(){
   }
 }
 
-/* TIME CHECK */
+/* TIME CHECK (FIXED) */
 function checkStatus(open, close){
+
   let now = new Date();
 
   let [oh, om] = open.split(":");
   let [ch, cm] = close.split(":");
 
-  let o = new Date(); o.setHours(oh,om,0);
-  let c = new Date(); c.setHours(ch,cm,0);
+  let o = new Date();
+  o.setHours(oh, om, 0);
+
+  let c = new Date();
+  c.setHours(ch, cm, 0);
+
+  // overnight fix
+  if(c < o){
+    c.setDate(c.getDate() + 1);
+  }
+
+  if(now < o){
+    now.setDate(now.getDate() + 1);
+  }
 
   return now >= o && now <= c;
 }
