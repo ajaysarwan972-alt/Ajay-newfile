@@ -59,6 +59,16 @@ font-size:13px;
 }
 
 .hide{display:none;}
+
+/* 🔥 IMAGE PREVIEW FIX */
+.preview{
+margin-top:10px;
+width:100%;
+max-height:250px;
+object-fit:contain;
+border-radius:10px;
+background:#eee;
+}
 </style>
 </head>
 
@@ -89,28 +99,26 @@ font-size:13px;
 <!-- IMAGE -->
 <div id="imageBox" class="hide">
 
-<input type="file" id="imageInput">
+<input type="file" id="imageInput" onchange="previewImage()">
+
+<!-- 🔥 IMAGE SHOW -->
+<img id="preview" class="preview hide">
+
 <input type="number" id="imageAmount" placeholder="Enter Total Amount">
 
 <div class="submit" onclick="submitImage()">SUBMIT</div>
 
 </div>
 
-<!-- 🔥 NOTICE -->
+<!-- NOTICE -->
 <div class="note">
 📢 नोटिस:<br><br>
-
 अपनी गेम साफ-साफ लिखें।<br><br>
-
 Typing में इस प्रकार लिखें: 01 02 03 (amount)<br><br>
-
 आप ₹ या ₹. जैसे चिन्ह का उपयोग कर सकते हैं।<br><br>
-
 Image में साफ पर्ची ही अपलोड करें।<br><br>
-
 कृपया टोटल सही रखें।<br>
 टोटल गलत होने पर ऊपर से हिसाब किया जाएगा।<br><br>
-
 जितने पैसे कम होंगे, उतने नीचे के नंबरों में पैसे कम कर दिए जाएंगे।
 </div>
 
@@ -125,6 +133,17 @@ const client = supabase.createClient(
 
 const user = JSON.parse(localStorage.getItem("user"));
 const market = localStorage.getItem("market");
+
+// 🔥 IMAGE PREVIEW FUNCTION
+function previewImage(){
+let file=document.getElementById("imageInput").files[0];
+let preview=document.getElementById("preview");
+
+if(file){
+preview.src=URL.createObjectURL(file);
+preview.classList.remove("hide");
+}
+}
 
 // wallet load
 async function loadWallet(){
@@ -141,7 +160,7 @@ document.getElementById("imageBox").classList.add("hide");
 document.getElementById(id).classList.remove("hide");
 }
 
-// 🔥 TYPING
+// TYPING
 async function submitTyping(){
 
 let text=document.getElementById("typingData").value;
@@ -159,12 +178,10 @@ alert("Low balance");
 return;
 }
 
-// wallet cut
 await client.from("login").update({
 balance:data.balance-amount
 }).eq("id",user.id);
 
-// save
 await client.from("typing_image").insert([{
 user_id:user.id,
 market:market,
@@ -176,7 +193,7 @@ alert("Done");
 location.reload();
 }
 
-// 🔥 IMAGE
+// IMAGE
 async function submitImage(){
 
 let file=document.getElementById("imageInput").files[0];
@@ -189,7 +206,6 @@ return;
 
 let fileName=Date.now()+"_"+file.name;
 
-// upload
 let { error } = await client.storage
 .from("screenshots")
 .upload(fileName, file);
@@ -199,14 +215,12 @@ alert(error.message);
 return;
 }
 
-// public url
 let { data } = client.storage
 .from("screenshots")
 .getPublicUrl(fileName);
 
 let imageUrl = data.publicUrl;
 
-// wallet
 let {data:userData}=await client.from("login").select("balance").eq("id",user.id).single();
 
 if(userData.balance<amount){
@@ -214,12 +228,10 @@ alert("Low balance");
 return;
 }
 
-// wallet cut
 await client.from("login").update({
 balance:userData.balance-amount
 }).eq("id",user.id);
 
-// save
 await client.from("typing_image").insert([{
 user_id:user.id,
 market:market,
