@@ -113,6 +113,23 @@ body{
   margin-top:10px;
 }
 
+/* ✅ WHATSAPP BUTTON */
+.whatsapp{
+  position:fixed;
+  bottom:80px;
+  right:15px;
+  width:55px;
+  height:55px;
+  background:#25D366;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:white;
+  font-size:28px;
+  z-index:999;
+}
+
 /* NAV */
 #bottomNav{
   position:fixed;
@@ -146,7 +163,6 @@ body{
 
 <body>
 
-<!-- ✅ MENU BUTTON FIXED -->
 <div id="menuBtn" onclick="openMenu()">☰</div>
 
 <div id="userId">ID: 0000</div>
@@ -164,6 +180,9 @@ body{
 
 <div class="container" id="container"></div>
 
+<!-- ✅ ONLY ONE WHATSAPP BUTTON -->
+<a class="whatsapp" href="https://wa.me/919053922906" target="_blank">💬</a>
+
 <div id="bottomNav">
   <div class="navBtn" onclick="go('referral.html')">Share</div>
   <div class="navBtn" onclick="go('india.html')">PLAY INDIA</div>
@@ -171,7 +190,6 @@ body{
   <div class="navBtn">Profile</div>
 </div>
 
-<!-- ✅ MENU JS LINK ADDED -->
 <script src="menu.js"></script>
 
 <script>
@@ -184,7 +202,6 @@ const client = supabase.createClient(
   "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
-/* MODE */
 let mode = localStorage.getItem("mode") || "2";
 
 function toggleMode(){
@@ -200,7 +217,6 @@ function setModeText(){
 
 setModeText();
 
-/* WALLET */
 async function loadWallet(){
   const { data } = await client
     .from("login")
@@ -214,7 +230,6 @@ async function loadWallet(){
   }
 }
 
-/* TIME CHECK */
 function checkStatus(openTime, closeTime){
   let now = new Date();
   let [oh, om] = openTime.split(":");
@@ -234,7 +249,6 @@ function checkStatus(openTime, closeTime){
   return (now >= open && now <= close);
 }
 
-/* LOAD GAME */
 async function loadButtons(){
 
   let { data } = await client
