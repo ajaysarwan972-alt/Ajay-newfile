@@ -13,14 +13,14 @@ body{font-family:Arial;margin:0;background:#e5e7eb;padding-bottom:80px;}
 position:fixed;top:10px;left:10px;right:10px;
 background:#fff;padding:10px;border-radius:20px;
 display:flex;justify-content:space-between;
+z-index:999;
 }
 
 #userId{background:green;color:#fff;padding:6px 12px;border-radius:20px;font-size:12px;}
 #wallet{background:red;color:#fff;padding:6px 12px;border-radius:20px;font-size:12px;}
 
 .topBtns{margin-top:80px;display:flex;justify-content:space-around;}
-.topBtn{width:18%;padding:10px;border-radius:20px;color:#fff;text-align:center;font-size:12px;cursor:pointer;}
-
+.topBtn{width:18%;padding:10px;border-radius:20px;color:#fff;text-align:center;cursor:pointer;font-size:12px;}
 .btn1{background:#6c5ce7;}
 .btn2{background:#00b894;}
 .btn3{background:#0984e3;}
@@ -34,12 +34,21 @@ display:flex;justify-content:space-between;
 
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
 .box{background:#fff;padding:10px;border-radius:10px;text-align:center;border:1px solid #ddd;}
-
 input{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;}
 
 .bottom{position:fixed;bottom:0;width:100%;display:flex;}
 .total{width:50%;background:linear-gradient(to right,blue,red);color:#fff;text-align:center;padding:15px;}
-.submit{width:50%;background:green;color:#fff;text-align:center;padding:15px;font-weight:bold;cursor:pointer;}
+
+.submit{
+width:50%;
+background:green;
+color:#fff;
+text-align:center;
+padding:15px;
+font-weight:bold;
+font-size:16px;
+cursor:pointer;
+}
 </style>
 </head>
 
@@ -77,6 +86,7 @@ input{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;}
 <label>POINTS</label>
 <input id="points">
 <button onclick="generateCross()">SET</button>
+<div id="crossGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;"></div>
 </div>
 
 <div id="copy" class="game container">
@@ -85,6 +95,10 @@ input{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;}
 <label>ENTER AMOUNT</label>
 <input id="amt">
 <button onclick="generateCopy()">ADD</button>
+
+<table id="table" border="1" width="100%">
+<tr><th>NUMBER</th><th>AMOUNT</th><th>DEL</th></tr>
+</table>
 </div>
 
 <div class="bottom">
@@ -99,17 +113,28 @@ const client = supabase.createClient(
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
-// ✅ SAFE USER LOAD
 const user = JSON.parse(localStorage.getItem("user"));
-
-if(!user){
-alert("Login first");
-window.location.href="login.html";
-}
-
 document.getElementById("userId").innerText = "ID: " + user.id;
 
-let mode = Number(localStorage.getItem("mode")) || 1;
+loadUser();
+
+async function loadUser(){
+if(!user){
+alert("Login again");
+return;
+}
+
+let {data} = await client
+.from("login")
+.select("balance")
+.eq("id", user.id)
+.single();
+
+if(data){
+document.getElementById("wallet").innerText = "₹ " + data.balance;
+}
+}
+
 const market = localStorage.getItem("market") || "UNKNOWN";
 
 let dataArr = [];
@@ -126,13 +151,11 @@ document.querySelectorAll(".game").forEach(g=>g.classList.remove("active"));
 document.getElementById(id).classList.add("active");
 }
 
-// JODI
 for(let i=0;i<100;i++){
 let num=i.toString().padStart(2,'0');
 jodiGrid.innerHTML+=`<div class="box">${num}<input oninput="add('${num}',this.value)"></div>`;
 }
 
-// HARUF
 for(let i=0;i<10;i++){
 harufGrid1.innerHTML+=`<div class="box">${i}<input oninput="add('A${i}',this.value)"></div>`;
 harufGrid2.innerHTML+=`<div class="box">${i}<input oninput="add('B${i}',this.value)"></div>`;
@@ -145,40 +168,61 @@ if(val>0){dataArr.push({number:num,amount:val});}
 updateTotal();
 }
 
-// ✅ FIXED CROSS
+let lastCrossInput="";
 function generateCross(){
 let n1=num1.value.trim();
 let n2=num2.value.trim();
-let a=Number(points.value)||0;
+let a=Number(points.value);
+
+let current=n1+"|"+n2+"|"+a;
+if(current===lastCrossInput) return;
+lastCrossInput=current;
+
+crossGrid.innerHTML="";
+dataArr=[];
 
 for(let i of n1){
 for(let j of n2){
-let num=i+j;
-dataArr = dataArr.filter(x=>x.number!==num);
-dataArr.push({number:num,amount:a});
+let pair=i+j;
+
+let exist=dataArr.find(x=>x.number===pair);
+if(exist){exist.amount+=a;}
+else{dataArr.push({number:pair,amount:a});}
+
+crossGrid.innerHTML+=`<div class="box">${pair}<br>₹${a}</div>`;
 }}
 
 updateTotal();
 }
 
-// ✅ FIXED COPY
+let lastCopyInput="";
 function generateCopy(){
 let d=digits.value.trim();
-let a=Number(amt.value)||0;
+let a=Number(amt.value);
 
-let arr=d.match(/.{1,2}/g)||[];
+let current=d+"|"+a;
+if(current===lastCopyInput) return;
+lastCopyInput=current;
+
+table.innerHTML=`<tr><th>NUMBER</th><th>AMOUNT</th><th>DEL</th></tr>`;
+dataArr=[];
+
+let arr=d.match(/.{1,2}/g);
 
 arr.forEach(num=>{
 if(num.length==1) num="0"+num;
 
-dataArr = dataArr.filter(x=>x.number!==num);
-dataArr.push({number:num,amount:a});
+let exist=dataArr.find(x=>x.number===num);
+if(exist){exist.amount+=a;}
+else{dataArr.push({number:num,amount:a});}
+
+table.innerHTML+=`<tr><td>${num}</td><td>${a}</td><td>X</td></tr>`;
 });
 
 updateTotal();
 }
 
-// ✅ FINAL SUBMIT
+// ✅ FINAL SUBMIT (5 multiple rule added)
 async function submitAll(){
 
 if(dataArr.length===0){
@@ -186,13 +230,12 @@ alert("Kuch add karo pehle");
 return;
 }
 
-if(mode === 2){
+// 🔥 NEW RULE
 for(let i of dataArr){
-if(i.amount < 10 || i.amount % 10 !== 0){
-alert("Mode 2 me sirf 10,20,30 allowed");
-return;
-}
-}
+  if(i.amount < 5 || i.amount % 5 !== 0){
+    alert("Minimum 5 aur sirf 5 ke multiple allowed (5,10,15...)");
+    return;
+  }
 }
 
 let {data:userData} = await client
@@ -202,7 +245,7 @@ let {data:userData} = await client
 .single();
 
 if(userData.balance < total){
-alert("LOW BALANCE");
+alert("YOUR BALANCE IS LOW GAME CANCEL❌");
 return;
 }
 
@@ -211,24 +254,23 @@ await client.from("login")
 .eq("id", user.id);
 
 await client.from("history")
-.insert([{
-user_id:user.id,
-market:market,
-data:dataArr,
-total:total,
-mode:mode,
-created_at:new Date().toISOString()
-}]);
+.insert({
+user_id: user.id,
+market: market,
+data: dataArr,
+total: total,
+created_at: new Date()
+});
 
-// ✅ WALLET UPDATE UI
-document.getElementById("wallet").innerText = "₹ " + (userData.balance - total);
-
-alert("GAME OK");
+alert("GAME OK✅");
+await loadUser();
 
 dataArr=[];
 total=0;
 updateTotal();
 document.querySelectorAll("input").forEach(i=>i.value="");
+document.getElementById("table").innerHTML=`<tr><th>NUMBER</th><th>AMOUNT</th><th>DEL</th></tr>`;
+document.getElementById("crossGrid").innerHTML="";
 }
 
 </script>
